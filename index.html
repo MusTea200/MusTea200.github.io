@@ -51,6 +51,9 @@
             align-items: center;
             justify-content: center;
         }
+        .inventory-slot svg {
+            pointer-events: none;
+        }
         .equipment-slot.drag-over {
             border-color: #3b82f6;
             box-shadow: 0 0 10px #3b82f6;
@@ -323,7 +326,7 @@
                 </button>
                  <button id="market-button" class="location-button absolute" style="top: 65%; left: 55%;">
                      <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mb-2 mx-auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0-4.4-3.6-8-8-8s-8 3.6-8 8 3.6 8 8 8 8-3.6 8-8z"></path><path d="M15 10c0 1.7-1.3 3-3 3s-3-1.3-3-3 1.3-3 3-3 3 1.3 3 3z"></path><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="M22 12h-2"></path><path d="M4 12H2"></path></svg>
-                    <span class="font-bold">Market</span>
+                    <span class="font-bold">AVM</span>
                 </button>
             </div>
             <!-- Home Screen -->
@@ -332,7 +335,10 @@
                 <div class="text-center space-y-4">
                     <button class="btn-primary p-4 rounded-lg">Yatak: Can ve Enerji yeniler.</button>
                     <button id="open-chest-button" class="btn-primary p-4 rounded-lg">Sandık: Eşyalarını depola.</button>
-                    <button class="btn-primary p-4 rounded-lg">Dolap: Görünümünü değiştir.</button>
+                    <button id="open-wardrobe-button" class="btn-primary p-4 rounded-lg flex items-center justify-center gap-3">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M12 22a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2h-1.5a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h1.5z"/><path d="M8.5 2v12.5a2 2 0 0 0 2 2h0a2 2 0 0 0 2-2V2"/><path d="M15.5 2v12.5a2 2 0 0 1-2 2h0a2 2 0 0 1-2-2V2"/></svg>
+    <span>Gardırop: Görünümünü Değiştir</span>
+</button>
                 </div>
                 <button class="nav-arrow back-to-village-button" style="top: 5%; left: 50%; transform: translateX(-50%);" title="Köy'e Geri Dön">
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
@@ -347,6 +353,43 @@
                      <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                 </button>
             </div>
+            <div id="wardrobe-screen" class="game-sub-screen hidden w-full h-full">
+    <div class="form-container rounded-2xl p-8 shadow-2xl w-full max-w-2xl relative">
+        <button class="nav-arrow back-to-home-button" style="top: -80px; left: 50%; transform: translateX(-50%);" title="Eve Geri Dön">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
+        </button>
+
+        <h1 class="text-3xl font-bold text-center mb-6">Gardırop</h1>
+        <div class="flex flex-col md:flex-row items-center justify-around gap-8">
+            <div class="w-48 h-72 bg-gray-900/50 rounded-lg flex items-center justify-center p-2 border border-gray-700">
+                <svg id="wardrobe-character-preview" viewBox="0 0 200 300" class="w-full h-full"></svg>
+            </div>
+            <div class="w-full md:w-1/2" id="wardrobe-options-container">
+                <div class="space-y-4">
+                    <div>
+                        <label class="font-semibold text-gray-300">Cinsiyet</label>
+                        <div id="wardrobe-gender-buttons" class="flex gap-2 mt-2">
+                            <button type="button" data-gender="male" class="gender-btn w-full bg-gray-700 p-2 rounded-lg transition">Erkek</button>
+                            <button type="button" data-gender="female" class="gender-btn w-full bg-gray-700 p-2 rounded-lg transition">Kadın</button>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="font-semibold text-gray-300">Ten Rengi</label>
+                        <div id="wardrobe-skin-color-swatches" class="flex gap-2 mt-2 flex-wrap"></div>
+                    </div>
+                    <div>
+                        <label class="font-semibold text-gray-300">Saç Rengi</label>
+                        <div id="wardrobe-hair-color-swatches" class="flex gap-2 mt-2 flex-wrap"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <button id="confirm-wardrobe-change-button" class="btn-primary w-full text-white font-bold py-3 rounded-lg mt-8 flex items-center justify-center gap-2">
+            <span>Değişiklikleri Onayla</span>
+            <span class="flex items-center">(100 <span class="text-blue-400 ml-1">💎</span>)</span>
+        </button>
+    </div>
+</div>
             <!-- Other Game Sub-screens -->
             <div id="garage-screen" class="game-sub-screen hidden w-full h-full">
                 <h1 class="text-4xl font-bold">Garaj</h1>
@@ -411,9 +454,9 @@
                     </button>
                     <h1 class="text-4xl font-bold mb-8">Market</h1>
                     <div class="flex gap-8">
-                        <button id="show-market-buy-button" class="btn-primary p-8 rounded-lg">Satın Al</button>
-                        <button id="show-market-sell-button" class="btn-primary p-8 rounded-lg">Sat</button>
-                        <button id="show-market-trade-button" class="btn-primary p-8 rounded-lg">Alış/Satış</button>
+                        <button id="show-market-buy-button" class="btn-primary p-8 rounded-lg">Pazar</button>
+                        <button id="show-market-sell-button" class="btn-primary p-8 rounded-lg">Borsa</button>
+                        <button id="show-market-trade-button" class="btn-primary p-8 rounded-lg">Market</button>
                     </div>
                 </div>
                  <div id="market-buy-screen" class="hidden text-center">
@@ -583,7 +626,6 @@
                     </div>
                     <p id="gift-code-message" class="text-sm h-4"></p>
                 </div>
-               <button id="reset-character-button" class="w-full bg-yellow-600 hover:bg-yellow-500 transition font-bold py-3 rounded-lg">Karakteri Sıfırla (100💎)</button>
                <button id="logout-button" class="w-full bg-red-600 hover:bg-red-500 transition font-bold py-3 rounded-lg">Oturumu Kapat</button>
            </div>
            <button id="close-settings-modal" class="bg-gray-700 hover:bg-gray-600 transition w-full text-white font-bold py-3 rounded-lg mt-10">Kapat</button>
@@ -716,35 +758,169 @@
         };
 
         // GÜNCELLENMİŞ EŞYA LİSTESİ
+        
         const GAME_ITEMS = {
-            // Silahlar (Değişiklik yok)
-            'shadow_dagger': { name: "Gölge Hançer", category: 'Silah', rarity: 'uncommon', buyPrice: 150, sellPrice: 75, stats: { damage: 8, dodge: 2 }, icon: '<svg>...</svg>' },
-            'crimson_axe': { name: "Kızıl Balta", category: 'Silah', rarity: 'rare', buyPrice: 300, sellPrice: 150, stats: { damage: 15, hp: 20 }, icon: '<svg>...</svg>' },
-            'storm_bow': { name: "Fırtına Yayı", category: 'Silah', rarity: 'rare', buyPrice: 320, sellPrice: 160, stats: { damage: 12, speed: 5 }, icon: '<svg>...</svg>' },
-            'obsidian_sword': { name: "Obsidyen Kılıç", category: 'Silah', rarity: 'epic', buyPrice: 750, sellPrice: 375, stats: { damage: 25, damageReduction: 2 }, icon: '<svg>...</svg>' },
-            'mage_staff': { name: "Büyücü Asası", category: 'Silah', rarity: 'epic', buyPrice: 700, sellPrice: 350, stats: { damage: 20, mana: 50 }, icon: '<svg>...</svg>' },
-            
-            // Zırhlar (subCategory eklendi)
-            'runic_helmet': { name: "Rünlü Miğfer", category: 'Zırh', subCategory: 'Kask', rarity: 'epic', buyPrice: 600, sellPrice: 300, stats: { armor: 12, mana: 40 }, icon: '<svg>...</svg>' },
-            'iron_chestplate': { name: "Demir Göğüslük", category: 'Zırh', subCategory: 'Göğüslük', rarity: 'common', buyPrice: 100, sellPrice: 50, stats: { armor: 10, hp: 30 }, icon: '<svg>...</svg>' },
-            'dragon_scale_armor': { name: "Ejderha Pulu Zırhı", category: 'Zırh', subCategory: 'Göğüslük', rarity: 'legendary', buyPrice: 2000, sellPrice: 1000, stats: { armor: 35, hp: 100, damageReduction: 5 }, icon: '<svg>...</svg>' },
-            'elven_armor': { name: "Elf Zırhı", category: 'Zırh', subCategory: 'Göğüslük', rarity: 'rare', buyPrice: 550, sellPrice: 275, stats: { armor: 15, dodge: 5 }, icon: '<svg>...</svg>' },
-            'leather_pants': { name: "Deri Pantolon", category: 'Zırh', subCategory: 'Pantolon', rarity: 'common', buyPrice: 80, sellPrice: 40, stats: { armor: 5 }, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-yellow-700"><path d="M12 2v20"/><path d="M4 2v20"/><path d="M20 2v20"/><path d="M5 2h14a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z"/></svg>' },
-            'shadow_boots': { name: "Gölge Çizmeleri", category: 'Zırh', subCategory: 'Ayakkabı', rarity: 'uncommon', buyPrice: 280, sellPrice: 140, stats: { armor: 5, speed: 3 }, icon: '<svg>...</svg>' },
-            'gauntlets_of_strength': { name: "Güç Eldivenleri", category: 'Zırh', subCategory: 'Eldiven', rarity: 'rare', buyPrice: 320, sellPrice: 160, stats: { armor: 4, damage: 5 }, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-red-500"><path d="M17 11.5V9a2 2 0 0 0-2-2h- эмоциональный-5a2 2 0 0 0-2 2v2.5"/><path d="M17 11.5a2 2 0 0 1-2 2h-5a2 2 0 0 1-2-2"/><path d="M4 14v-2.5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2V14"/><path d="M8 18h8"/></svg>' },
-            
-            // Eklentiler (subCategory eklendi ve yeni örnekler eklendi)
-            'talisman_of_power': { name: "Güç Tılsımı", category: 'Eklenti', subCategory: 'Kolye', rarity: 'epic', buyPrice: 300, sellPrice: 150, stats: { flatDamage: 5, hp: 20 }, icon: '<svg>...</svg>' },
-            'bracelet_of_speed': { name: "Hız Bileziği", category: 'Eklenti', subCategory: 'Bilezik', rarity: 'rare', buyPrice: 280, sellPrice: 140, stats: { speed: 5 }, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-blue-400"><path d="M10 17a5 5 0 0 1-5-5 5 5 0 0 1 5-5h1a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-1z"/><path d="M7 17a2.5 2.5 0 0 1-2.5-2.5 2.5 2.5 0 0 1 2.5-2.5h1a2.5 2.5 0 0 1 2.5 2.5 2.5 2.5 0 0 1-2.5 2.5h-1z"/></svg>' },
-            'earring_of_wisdom': { name: "Bilgelik Küpesi", category: 'Eklenti', subCategory: 'Küpe', rarity: 'uncommon', buyPrice: 220, sellPrice: 110, stats: { mana: 30 }, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-purple-400"><path d="M12 12a3 3 0 0 1-3-3 3 3 0 0 1 3-3 3 3 0 0 1 3 3 3 3 0 0 1-3 3z"/><path d="M12 12v3a3 3 0 0 0 3 3h1a2 2 0 0 1 2 2v1h-8v-1a2 2 0 0 1 2-2h1a3 3 0 0 0 3-3z"/></svg>' },
-            'belt_of_fortitude': { name: "Metanet Kemeri", category: 'Eklenti', subCategory: 'Kemer', rarity: 'rare', buyPrice: 400, sellPrice: 200, stats: { damageReduction: 3 }, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-gray-400"><path d="M3 12h18M5 12V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v5"/><path d="M5 12v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/><path d="M12 7V2"/><path d="M12 17v5"/></svg>' },
-            'swift_horse': { name: "Atik At", category: 'Eklenti', subCategory: 'Binek', rarity: 'epic', buyPrice: 5000, sellPrice: 2500, stats: { travelTimeReduction: 15 }, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-yellow-600"><path d="M12 2a2 2 0 0 0-2 2v2h4V4a2 2 0 0 0-2-2z"/><path d="M4 14s1-1 4-1 5 2 8 2 4-1 4-1V6s-1 1-4 1-5-2-8-2-4 1-4 1z"/><path d="M4 6v8"/><path d="M20 6v8"/><path d="M8 18h8"/></svg>' },
-            'dragon_tattoo': { name: "Ejderha Dövmesi", category: 'Eklenti', subCategory: 'Dövme', rarity: 'legendary', buyPrice: 10000, sellPrice: 5000, stats: { damage: 10, hp: 50 }, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-red-600"><path d="M4 12c0-4.4 3.6-8 8-8s8 3.6 8 8-3.6 8-8 8-8-3.6-8-8z"/><path d="M12 2v20"/><path d="M12 12l6-6"/><path d="M12 12l-6 6"/><path d="M12 12l-6-6"/><path d="M12 12l6 6"/></svg>' },
-            'spirit_wolf': { name: "Ruh Kurt", category: 'Eklenti', subCategory: 'Evcil Hayvan', rarity: 'epic', buyPrice: 7500, sellPrice: 3750, stats: { dodge: 5, speed: 5 }, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-cyan-300"><path d="M12 12c-2.2 0-4-1.8-4-4s1.8-4 4-4 4 1.8 4 4-1.8 4-4 4z"/><path d="M12 12v3a4 4 0 0 1-4 4H4v-3a4 4 0 0 1 4-4h4z"/><path d="M12 12v3a4 4 0 0 0 4 4h4v-3a4 4 0 0 0-4-4h-4z"/></svg>' },
+    // =================================================================================
+    // SİLAHLAR
+    // =================================================================================
+    // -- Kısa Kılıç
+    'shortsword_1': { name: "Paslı Kısa Kılıç", category: 'Silah', subCategory: 'Kısa kılıç', baseRarity: 'common', requiredLevel: 1, stats: { damage: 6 }, buyPrice: 60, sellPrice: 30, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-yellow-700"><path d="M14.5 17.5 3 6V3h3l11.5 11.5"/><path d="m21 15-6-6"/><path d="M3.5 17.5 9 12"/><path d="M15 3.5 12 9"/></svg>' },
+    'shortsword_2': { name: "Demir Kısa Kılıç", category: 'Silah', subCategory: 'Kısa kılıç', baseRarity: 'common', requiredLevel: 5, stats: { damage: 11 }, buyPrice: 150, sellPrice: 75, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-gray-400"><path d="M14.5 17.5 3 6V3h3l11.5 11.5"/><path d="m21 15-6-6"/><path d="M3.5 17.5 9 12"/><path d="M15 3.5 12 9"/></svg>' },
+    'shortsword_3': { name: "Çelik Kısa Kılıç", category: 'Silah', subCategory: 'Kısa kılıç', baseRarity: 'rare', requiredLevel: 12, stats: { damage: 18, speed: 2 }, buyPrice: 500, sellPrice: 250, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-blue-300"><path d="M14.5 17.5 3 6V3h3l11.5 11.5"/><path d="m21 15-6-6"/><path d="M3.5 17.5 9 12"/><path d="M15 3.5 12 9"/></svg>' },
+    'shortsword_4': { name: "Elf İşi Kısa Kılıç", category: 'Silah', subCategory: 'Kısa kılıç', baseRarity: 'rare', requiredLevel: 18, stats: { damage: 25, dodge: 3 }, buyPrice: 0, sellPrice: 450, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-green-400"><path d="M14.5 17.5 3 6V3h3l11.5 11.5"/><path d="m21 15-6-6"/><path d="M3.5 17.5 9 12"/><path d="M15 3.5 12 9"/></svg>' },
+    'shortsword_5': { name: "Obsidyen Kama", category: 'Silah', subCategory: 'Kısa kılıç', baseRarity: 'epic', requiredLevel: 25, stats: { damage: 35, damageReduction: 1 }, buyPrice: 0, sellPrice: 900, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-purple-400"><path d="M14.5 17.5 3 6V3h3l11.5 11.5"/><path d="m21 15-6-6"/><path d="M3.5 17.5 9 12"/><path d="M15 3.5 12 9"/></svg>' },
+    
+    // -- Uzun Kılıç
+    'longsword_1': { name: "Acemi Uzun Kılıcı", category: 'Silah', subCategory: 'Uzun kılıç', baseRarity: 'common', requiredLevel: 3, stats: { damage: 9 }, buyPrice: 100, sellPrice: 50, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-gray-300"><path d="M21.7 18.3c.4-.4.4-1 0-1.4l-3-3-1.4 1.4 3 3c.4.4 1 .4 1.4 0z"/><path d="m16 5-4 4-3 3-4 4 1.4 1.4 4-4 3-3 4-4z"/><path d="M10 6 5 11l-4 4 1.4 1.4 4-4 5-5z"/><path d="M2 22l4-4"/><path d="m18 12 4-4"/></svg>' },
+    'longsword_2': { name: "Şövalye Kılıcı", category: 'Silah', subCategory: 'Uzun kılıç', baseRarity: 'common', requiredLevel: 8, stats: { damage: 15, hp: 10 }, buyPrice: 280, sellPrice: 140, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-gray-500"><path d="M21.7 18.3c.4-.4.4-1 0-1.4l-3-3-1.4 1.4 3 3c.4.4 1 .4 1.4 0z"/><path d="m16 5-4 4-3 3-4 4 1.4 1.4 4-4 3-3 4-4z"/><path d="M10 6 5 11l-4 4 1.4 1.4 4-4 5-5z"/><path d="M2 22l4-4"/><path d="m18 12 4-4"/></svg>' },
+    'longsword_3': { name: "Gümüş Uzun Kılıç", category: 'Silah', subCategory: 'Uzun kılıç', baseRarity: 'rare', requiredLevel: 15, stats: { damage: 24 }, buyPrice: 700, sellPrice: 350, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-blue-200"><path d="M21.7 18.3c.4-.4.4-1 0-1.4l-3-3-1.4 1.4 3 3c.4.4 1 .4 1.4 0z"/><path d="m16 5-4 4-3 3-4 4 1.4 1.4 4-4 3-3 4-4z"/><path d="M10 6 5 11l-4 4 1.4 1.4 4-4 5-5z"/><path d="M2 22l4-4"/><path d="m18 12 4-4"/></svg>' },
+    'longsword_4': { name: "Alevli Uzun Kılıç", category: 'Silah', subCategory: 'Uzun kılıç', baseRarity: 'epic', requiredLevel: 22, stats: { damage: 33 }, buyPrice: 0, sellPrice: 1200, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-orange-500"><path d="M21.7 18.3c.4-.4.4-1 0-1.4l-3-3-1.4 1.4 3 3c.4.4 1 .4 1.4 0z"/><path d="m16 5-4 4-3 3-4 4 1.4 1.4 4-4 3-3 4-4z"/><path d="M10 6 5 11l-4 4 1.4 1.4 4-4 5-5z"/><path d="M2 22l4-4"/><path d="m18 12 4-4"/></svg>' },
+    'longsword_5': { name: "Ejder Kemiği Kılıcı", category: 'Silah', subCategory: 'Uzun kılıç', baseRarity: 'legendary', requiredLevel: 30, stats: { damage: 45, hp: 50 }, buyPrice: 0, sellPrice: 2500, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-red-500"><path d="M21.7 18.3c.4-.4.4-1 0-1.4l-3-3-1.4 1.4 3 3c.4.4 1 .4 1.4 0z"/><path d="m16 5-4 4-3 3-4 4 1.4 1.4 4-4 3-3 4-4z"/><path d="M10 6 5 11l-4 4 1.4 1.4 4-4 5-5z"/><path d="M2 22l4-4"/><path d="m18 12 4-4"/></svg>' },
 
-            // Canavar Parçaları (Değişiklik yok)
-            'goblin_ear': { name: "Goblin Kulağı", category: 'Canavar Parçası', rarity: 'common', buyPrice: 20, sellPrice: 10, icon: '<svg>...</svg>' }
-        };
+    // -- Hançer
+    'dagger_1': { name: "Demir Hançer", category: 'Silah', subCategory: 'Hançer', baseRarity: 'common', requiredLevel: 2, stats: { damage: 7, speed: 3 }, buyPrice: 120, sellPrice: 60, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-gray-400"><path d="m2.6 15.6 3.4-3.4c.2-.2.5-.3.8-.3H10l6-6-4.5-4.5-6 6v3.2c0 .3-.1.6-.3.8L2.6 15.6a3 3 0 0 0 0 4.2l.6.6a3 3 0 0 0 4.2 0l-4.8-4.8Z"/></svg>' },
+    'dagger_2': { name: "Suikastçi Hançeri", category: 'Silah', subCategory: 'Hançer', baseRarity: 'common', requiredLevel: 7, stats: { damage: 12, speed: 5 }, buyPrice: 250, sellPrice: 125, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-gray-600"><path d="m2.6 15.6 3.4-3.4c.2-.2.5-.3.8-.3H10l6-6-4.5-4.5-6 6v3.2c0 .3-.1.6-.3.8L2.6 15.6a3 3 0 0 0 0 4.2l.6.6a3 3 0 0 0 4.2 0l-4.8-4.8Z"/></svg>' },
+    'dagger_3': { name: "Zehirli Hançer", category: 'Silah', subCategory: 'Hançer', baseRarity: 'rare', requiredLevel: 14, stats: { damage: 20, speed: 4 }, buyPrice: 680, sellPrice: 340, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-lime-500"><path d="m2.6 15.6 3.4-3.4c.2-.2.5-.3.8-.3H10l6-6-4.5-4.5-6 6v3.2c0 .3-.1.6-.3.8L2.6 15.6a3 3 0 0 0 0 4.2l.6.6a3 3 0 0 0 4.2 0l-4.8-4.8Z"/></svg>' },
+    'dagger_4': { name: "Ruh Kesiği", category: 'Silah', subCategory: 'Hançer', baseRarity: 'epic', requiredLevel: 21, stats: { damage: 28, speed: 6, mana: 20 }, buyPrice: 0, sellPrice: 1150, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-indigo-400"><path d="m2.6 15.6 3.4-3.4c.2-.2.5-.3.8-.3H10l6-6-4.5-4.5-6 6v3.2c0 .3-.1.6-.3.8L2.6 15.6a3 3 0 0 0 0 4.2l.6.6a3 3 0 0 0 4.2 0l-4.8-4.8Z"/></svg>' },
+    'dagger_5': { name: "Gölgelerin Dişi", category: 'Silah', subCategory: 'Hançer', baseRarity: 'epic', requiredLevel: 28, stats: { damage: 38, dodge: 5 }, buyPrice: 0, sellPrice: 2300, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-violet-500"><path d="m2.6 15.6 3.4-3.4c.2-.2.5-.3.8-.3H10l6-6-4.5-4.5-6 6v3.2c0 .3-.1.6-.3.8L2.6 15.6a3 3 0 0 0 0 4.2l.6.6a3 3 0 0 0 4.2 0l-4.8-4.8Z"/></svg>' },
+
+    // -- Balta
+    'axe_1': { name: "Oduncu Baltası", category: 'Silah', subCategory: 'Balta', baseRarity: 'common', requiredLevel: 4, stats: { damage: 12 }, buyPrice: 110, sellPrice: 55, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-yellow-700"><path d="m14 12-8.5 8.5a2.12 2.12 0 1 1-3-3L11 9"/><path d="M15 13 9 7l4-4 6 6h3l-3 3z"/></svg>' },
+    'axe_2': { name: "Savaş Baltası", category: 'Silah', subCategory: 'Balta', baseRarity: 'common', requiredLevel: 9, stats: { damage: 19, hp: 15 }, buyPrice: 320, sellPrice: 160, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-gray-500"><path d="m14 12-8.5 8.5a2.12 2.12 0 1 1-3-3L11 9"/><path d="M15 13 9 7l4-4 6 6h3l-3 3z"/></svg>' },
+    'axe_3': { name: "Cüce Baltası", category: 'Silah', subCategory: 'Balta', baseRarity: 'rare', requiredLevel: 16, stats: { damage: 28, damageReduction: 1 }, buyPrice: 750, sellPrice: 375, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-blue-400"><path d="m14 12-8.5 8.5a2.12 2.12 0 1 1-3-3L11 9"/><path d="M15 13 9 7l4-4 6 6h3l-3 3z"/></svg>' },
+    'axe_4': { name: "Cellat Baltası", category: 'Silah', subCategory: 'Balta', baseRarity: 'rare', requiredLevel: 24, stats: { damage: 38 }, buyPrice: 0, sellPrice: 1300, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-red-600"><path d="m14 12-8.5 8.5a2.12 2.12 0 1 1-3-3L11 9"/><path d="M15 13 9 7l4-4 6 6h3l-3 3z"/></svg>' },
+    'axe_5': { name: "Gök Gürültüsü", category: 'Silah', subCategory: 'Balta', baseRarity: 'legendary', requiredLevel: 32, stats: { damage: 50, hp: 100 }, buyPrice: 0, sellPrice: 3000, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-yellow-400"><path d="m14 12-8.5 8.5a2.12 2.12 0 1 1-3-3L11 9"/><path d="M15 13 9 7l4-4 6 6h3l-3 3z"/></svg>' },
+
+    // -- Topuz
+    'mace_1': { name: "Ahşap Topuz", category: 'Silah', subCategory: 'Topuz', baseRarity: 'common', requiredLevel: 3, stats: { damage: 10 }, buyPrice: 90, sellPrice: 45, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-yellow-700"><path d="M14 22V8a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2h4"/><path d="M14 14h6a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v1.5"/></svg>' },
+    'mace_2': { name: "Demir Dikenli Topuz", category: 'Silah', subCategory: 'Topuz', baseRarity: 'common', requiredLevel: 8, stats: { damage: 17 }, buyPrice: 290, sellPrice: 145, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-gray-500"><path d="M14 22V8a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2h4"/><path d="M14 14h6a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v1.5"/></svg>' },
+    'mace_3': { name: "Rahip Topuzu", category: 'Silah', subCategory: 'Topuz', baseRarity: 'rare', requiredLevel: 15, stats: { damage: 25, mana: 25 }, buyPrice: 720, sellPrice: 360, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-blue-200"><path d="M14 22V8a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2h4"/><path d="M14 14h6a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v1.5"/></svg>' },
+    'mace_4': { name: "Kemik Kıran", category: 'Silah', subCategory: 'Topuz', baseRarity: 'epic', requiredLevel: 23, stats: { damage: 36, damageReduction: 2 }, buyPrice: 0, sellPrice: 1250, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-red-700"><path d="M14 22V8a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2h4"/><path d="M14 14h6a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v1.5"/></svg>' },
+    'mace_5': { name: "Deprem", category: 'Silah', subCategory: 'Topuz', baseRarity: 'epic', requiredLevel: 29, stats: { damage: 44, hp: 80 }, buyPrice: 0, sellPrice: 2400, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-orange-600"><path d="M14 22V8a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2h4"/><path d="M14 14h6a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v1.5"/></svg>' },
+
+    // -- Menzilliler
+    'ranged_1': { name: "Sapan", category: 'Silah', subCategory: 'Menzilliler', baseRarity: 'common', requiredLevel: 2, stats: { damage: 8, speed: 4 }, buyPrice: 70, sellPrice: 35, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-yellow-700"><path d="M7 20.32c-.8.88-1.55.43-1.68-.62.22-1.8 1.4-3.32 3.53-4.44.8-.42 1.68-.42 2.48 0 2.13 1.12 3.3 2.64 3.53 4.44.13 1.05-.88 1.5-1.68.62L12 18.88l-1.15 1.44z"/><path d="M19.33 11.67A2.12 2.12 0 0 0 19.33 8.5L12 .67 4.67 8.5a2.12 2.12 0 0 0 0 3.17l.79.83.66.66L12 7.17l5.88 5.89.66-.67.79-.82z"/></svg>' },
+    'ranged_2': { name: "Kısa Yay", category: 'Silah', subCategory: 'Menzilliler', baseRarity: 'common', requiredLevel: 6, stats: { damage: 13, speed: 6 }, buyPrice: 220, sellPrice: 110, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-yellow-800"><path d="M3 21c3 0 7-1 7-8-1 .7-2.2.9-3.4.7-1.4-.2-2.6-.9-3.6-1.7C2 11 2 9.3 2 8c0-4 4-6 6-6s6 2 6 6"/><path d="M2 8h20"/></svg>' },
+    'ranged_3': { name: "Arbalet", category: 'Silah', subCategory: 'Menzilliler', baseRarity: 'rare', requiredLevel: 13, stats: { damage: 26, speed: -2 }, buyPrice: 650, sellPrice: 325, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-gray-400"><path d="M3 21c3 0 7-1 7-8-1 .7-2.2.9-3.4.7-1.4-.2-2.6-.9-3.6-1.7C2 11 2 9.3 2 8c0-4 4-6 6-6s6 2 6 6"/><path d="M2 8h20"/><path d="M21 4h-4"/><path d="M21 8h-4"/><path d="M21 12h-4"/></svg>' },
+    'ranged_4': { name: "Elf Yayı", category: 'Silah', subCategory: 'Menzilliler', baseRarity: 'rare', requiredLevel: 20, stats: { damage: 30, speed: 8, dodge: 2 }, buyPrice: 0, sellPrice: 1100, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-green-400"><path d="M3 21c3 0 7-1 7-8-1 .7-2.2.9-3.4.7-1.4-.2-2.6-.9-3.6-1.7C2 11 2 9.3 2 8c0-4 4-6 6-6s6 2 6 6"/><path d="M2 8h20"/><path d="M21 4h-4"/><path d="M21 8h-4"/><path d="M21 12h-4"/></svg>' },
+    'ranged_5': { name: "Rüzgar Kesen", category: 'Silah', subCategory: 'Menzilliler', baseRarity: 'legendary', requiredLevel: 28, stats: { damage: 42, speed: 12 }, buyPrice: 0, sellPrice: 2800, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-cyan-300"><path d="M3 21c3 0 7-1 7-8-1 .7-2.2.9-3.4.7-1.4-.2-2.6-.9-3.6-1.7C2 11 2 9.3 2 8c0-4 4-6 6-6s6 2 6 6"/><path d="M2 8h20"/><path d="M21 4h-4"/><path d="M21 8h-4"/><path d="M21 12h-4"/></svg>' },
+
+    // -- Asa
+    'staff_1': { name: "Çırak Asası", category: 'Silah', subCategory: 'Asa', baseRarity: 'common', requiredLevel: 3, stats: { damage: 6, mana: 20 }, buyPrice: 130, sellPrice: 65, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-yellow-700"><path d="M21.44 11.05a.5.5 0 0 0 0-.5l-2-4A.5.5 0 0 0 18.95 6H5.06a.5.5 0 0 0-.49.55l2 4a.5.5 0 0 0 0 .5l-2 4a.5.5 0 0 0 .49.55h13.89a.5.5 0 0 0 .49-.55Z"/><path d="M3 22v-4"/><path d="M21 22v-4"/><path d="M12 18V2"/></svg>' },
+    'staff_2': { name: "Büyücü Asası", category: 'Silah', subCategory: 'Asa', baseRarity: 'common', requiredLevel: 8, stats: { damage: 12, mana: 40 }, buyPrice: 350, sellPrice: 175, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-gray-400"><path d="M21.44 11.05a.5.5 0 0 0 0-.5l-2-4A.5.5 0 0 0 18.95 6H5.06a.5.5 0 0 0-.49.55l2 4a.5.5 0 0 0 0 .5l-2 4a.5.5 0 0 0 .49.55h13.89a.5.5 0 0 0 .49-.55Z"/><path d="M3 22v-4"/><path d="M21 22v-4"/><path d="M12 18V2"/></svg>' },
+    'staff_3': { name: "Yakut Asa", category: 'Silah', subCategory: 'Asa', baseRarity: 'rare', requiredLevel: 15, stats: { damage: 20, mana: 60, hp: 20 }, buyPrice: 800, sellPrice: 400, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-red-500"><path d="M21.44 11.05a.5.5 0 0 0 0-.5l-2-4A.5.5 0 0 0 18.95 6H5.06a.5.5 0 0 0-.49.55l2 4a.5.5 0 0 0 0 .5l-2 4a.5.5 0 0 0 .49.55h13.89a.5.5 0 0 0 .49-.55Z"/><path d="M3 22v-4"/><path d="M21 22v-4"/><path d="M12 18V2"/></svg>' },
+    'staff_4': { name: "Bilge Asası", category: 'Silah', subCategory: 'Asa', baseRarity: 'epic', requiredLevel: 22, stats: { damage: 28, mana: 100 }, buyPrice: 0, sellPrice: 1500, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-blue-400"><path d="M21.44 11.05a.5.5 0 0 0 0-.5l-2-4A.5.5 0 0 0 18.95 6H5.06a.5.5 0 0 0-.49.55l2 4a.5.5 0 0 0 0 .5l-2 4a.5.5 0 0 0 .49.55h13.89a.5.5 0 0 0 .49-.55Z"/><path d="M3 22v-4"/><path d="M21 22v-4"/><path d="M12 18V2"/></svg>' },
+    'staff_5': { name: "Baş Büyücü Asası", category: 'Silah', subCategory: 'Asa', baseRarity: 'legendary', requiredLevel: 30, stats: { damage: 35, mana: 150, damageReduction: 2 }, buyPrice: 0, sellPrice: 3200, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-purple-400"><path d="M21.44 11.05a.5.5 0 0 0 0-.5l-2-4A.5.5 0 0 0 18.95 6H5.06a.5.5 0 0 0-.49.55l2 4a.5.5 0 0 0 0 .5l-2 4a.5.5 0 0 0 .49.55h13.89a.5.5 0 0 0 .49-.55Z"/><path d="M3 22v-4"/><path d="M21 22v-4"/><path d="M12 18V2"/></svg>' },
+
+    // -- Büyü Kitabı
+    'book_1': { name: "Acemi Büyü Kitabı", category: 'Silah', subCategory: 'Büyü kitabı', baseRarity: 'common', requiredLevel: 2, stats: { damage: 5, mana: 25 }, buyPrice: 150, sellPrice: 75, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-yellow-700"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>' },
+    'book_2': { name: "Ateş Büyüleri Kitabı", category: 'Silah', subCategory: 'Büyü kitabı', baseRarity: 'common', requiredLevel: 7, stats: { damage: 14, mana: 35 }, buyPrice: 380, sellPrice: 190, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-red-500"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>' },
+    'book_3': { name: "Buz Büyüleri Kitabı", category: 'Silah', subCategory: 'Büyü kitabı', baseRarity: 'rare', requiredLevel: 14, stats: { damage: 22, mana: 55 }, buyPrice: 780, sellPrice: 390, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-blue-400"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>' },
+    'book_4': { name: "Yasaklanmış Bilgiler", category: 'Silah', subCategory: 'Büyü kitabı', baseRarity: 'epic', requiredLevel: 23, stats: { damage: 34, mana: 80 }, buyPrice: 0, sellPrice: 1400, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-purple-500"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>' },
+    'book_5': { name: "Necronomicon", category: 'Silah', subCategory: 'Büyü kitabı', baseRarity: 'legendary', requiredLevel: 35, stats: { damage: 48, mana: 120, hp: -50 }, buyPrice: 0, sellPrice: 3500, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-green-600"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>' },
+
+    // =================================================================================
+    // ZIRHLAR
+    // =================================================================================
+    // -- Kask
+    'helmet_1': { name: "Deri Başlık", category: 'Zırh', subCategory: 'Kask', baseRarity: 'common', requiredLevel: 2, stats: { armor: 3 }, buyPrice: 40, sellPrice: 20, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-yellow-700"><path d="M12 2a4 4 0 0 0-4 4v2h8V6a4 4 0 0 0-4-4Z"/><path d="M18 12h-1.3a2 2 0 0 1-1.9-2.8l1.1-3.9a1 1 0 0 0-1-1.2h-4.8a1 1 0 0 0-1 1.2l1.1 3.8a2 2 0 0 1-2 2.8H6"/></svg>' },
+    'helmet_2': { name: "Demir Miğfer", category: 'Zırh', subCategory: 'Kask', baseRarity: 'common', requiredLevel: 6, stats: { armor: 8, hp: 10 }, buyPrice: 150, sellPrice: 75, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-gray-400"><path d="M12 2a4 4 0 0 0-4 4v2h8V6a4 4 0 0 0-4-4Z"/><path d="M18 12h-1.3a2 2 0 0 1-1.9-2.8l1.1-3.9a1 1 0 0 0-1-1.2h-4.8a1 1 0 0 0-1 1.2l1.1 3.8a2 2 0 0 1-2 2.8H6"/><path d="M12 22a4 4 0 0 0 4-4h-8a4 4 0 0 0 4 4Z"/></svg>' },
+    'helmet_3': { name: "Çelik Miğfer", category: 'Zırh', subCategory: 'Kask', baseRarity: 'rare', requiredLevel: 10, stats: { armor: 12, damageReduction: 1 }, buyPrice: 450, sellPrice: 225, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-blue-300"><path d="M12 2a4 4 0 0 0-4 4v2h8V6a4 4 0 0 0-4-4Z"/><path d="M18 12h-1.3a2 2 0 0 1-1.9-2.8l1.1-3.9a1 1 0 0 0-1-1.2h-4.8a1 1 0 0 0-1 1.2l1.1 3.8a2 2 0 0 1-2 2.8H6"/><path d="M12 22a4 4 0 0 0 4-4h-8a4 4 0 0 0 4 4Z"/></svg>' },
+    'helmet_4': { name: "Büyücü Şapkası", category: 'Zırh', subCategory: 'Kask', baseRarity: 'rare', requiredLevel: 16, stats: { armor: 8, mana: 30 }, buyPrice: 0, sellPrice: 380, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-indigo-400"><path d="M12 2a4 4 0 0 0-4 4v2h8V6a4 4 0 0 0-4-4Z"/><path d="M18 12h-1.3a2 2 0 0 1-1.9-2.8l1.1-3.9a1 1 0 0 0-1-1.2h-4.8a1 1 0 0 0-1 1.2l1.1 3.8a2 2 0 0 1-2 2.8H6"/></svg>' },
+    'helmet_5': { name: "Valkyrie Miğferi", category: 'Zırh', subCategory: 'Kask', baseRarity: 'legendary', requiredLevel: 28, stats: { armor: 20, hp: 50, damage: 5 }, buyPrice: 0, sellPrice: 2200, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-yellow-300"><path d="M12 2a4 4 0 0 0-4 4v2h8V6a4 4 0 0 0-4-4Z"/><path d="M18 12h-1.3a2 2 0 0 1-1.9-2.8l1.1-3.9a1 1 0 0 0-1-1.2h-4.8a1 1 0 0 0-1 1.2l1.1 3.8a2 2 0 0 1-2 2.8H6"/><path d="M12 22a4 4 0 0 0 4-4h-8a4 4 0 0 0 4 4Z"/></svg>' },
+
+    // -- Göğüslük
+    'chest_1': { name: "Kumaş Tunik", category: 'Zırh', subCategory: 'Göğüslük', baseRarity: 'common', requiredLevel: 1, stats: { armor: 4 }, buyPrice: 30, sellPrice: 15, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-gray-300"><path d="M21 15a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>' },
+    'chest_2': { name: "Demir Göğüslük", category: 'Zırh', subCategory: 'Göğüslük', baseRarity: 'common', requiredLevel: 7, stats: { armor: 15, hp: 30 }, buyPrice: 200, sellPrice: 100, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-gray-500"><path d="M21 15a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M6 10V8a6 6 0 0 1 12 0v2"/></svg>' },
+    'chest_3': { name: "Elf Zırhı", category: 'Zırh', subCategory: 'Göğüslük', baseRarity: 'rare', requiredLevel: 14, stats: { armor: 22, dodge: 5 }, buyPrice: 800, sellPrice: 400, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-green-400"><path d="m18.2 12 3.8-3L12 3 2 9l4 3-1.5 1.5L2 15l10 6 10-6-2.5-1.5Z"/><path d="M12 21V9"/><path d="m7.5 9.5-5.5 3"/><path d="m16.5 9.5 5.5 3"/></svg>' },
+    'chest_4': { name: "Büyücü Cübbesi", category: 'Zırh', subCategory: 'Göğüslük', baseRarity: 'rare', requiredLevel: 18, stats: { armor: 15, mana: 60 }, buyPrice: 0, sellPrice: 750, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-purple-400"><path d="M21 15a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>' },
+    'chest_5': { name: "Ejderha Pulu Zırhı", category: 'Zırh', subCategory: 'Göğüslük', baseRarity: 'legendary', requiredLevel: 32, stats: { armor: 40, hp: 100, damageReduction: 5 }, buyPrice: 0, sellPrice: 4000, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-orange-500"><path d="m2 14 4.1 4.1c.3.3.7.4 1.1.4h9.6c.4 0 .8-.1 1.1-.4L22 14"/><path d="m18 13-1.1-1.1a2 2 0 0 0-2.8 0L12 14l-2.1-2.1a2 2 0 0 0-2.8 0L6 13"/><path d="M15 3 9 9h6Z"/></svg>' },
+
+    // -- Pantolon
+    'pants_1': { name: "Kumaş Pantolon", category: 'Zırh', subCategory: 'Pantolon', baseRarity: 'common', requiredLevel: 1, stats: { armor: 2 }, buyPrice: 25, sellPrice: 12, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-gray-300"><path d="M12 2v20"/><path d="M4 2v20"/><path d="M20 2v20"/><path d="M5 2h14a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z"/></svg>' },
+    'pants_2': { name: "Deri Pantolon", category: 'Zırh', subCategory: 'Pantolon', baseRarity: 'common', requiredLevel: 4, stats: { armor: 6 }, buyPrice: 80, sellPrice: 40, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-yellow-700"><path d="M12 2v20"/><path d="M4 2v20"/><path d="M20 2v20"/><path d="M5 2h14a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z"/></svg>' },
+    'pants_3': { name: "Zincir Zırh Pantolon", category: 'Zırh', subCategory: 'Pantolon', baseRarity: 'rare', requiredLevel: 9, stats: { armor: 11 }, buyPrice: 350, sellPrice: 175, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-gray-500"><path d="M12 2v20"/><path d="M4 2v20"/><path d="M20 2v20"/><path d="M5 2h14a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z"/></svg>' },
+    'pants_4': { name: "Gezgin Pantolonu", category: 'Zırh', subCategory: 'Pantolon', baseRarity: 'rare', requiredLevel: 13, stats: { armor: 9, speed: 4 }, buyPrice: 0, sellPrice: 300, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-green-600"><path d="M12 2v20"/><path d="M4 2v20"/><path d="M20 2v20"/><path d="M5 2h14a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z"/></svg>' },
+    'pants_5': { name: "Alev Bacaklıkları", category: 'Zırh', subCategory: 'Pantolon', baseRarity: 'epic', requiredLevel: 26, stats: { armor: 18, damage: 5 }, buyPrice: 0, sellPrice: 1300, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-orange-500"><path d="M12 2v20"/><path d="M4 2v20"/><path d="M20 2v20"/><path d="M5 2h14a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z"/></svg>' },
+
+    // -- Ayakkabı
+    'boots_1': { name: "Yıpranmış Çizme", category: 'Zırh', subCategory: 'Ayakkabı', baseRarity: 'common', requiredLevel: 2, stats: { armor: 2, speed: 1 }, buyPrice: 35, sellPrice: 17, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-yellow-800"><path d="M6 14a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H6Z"/><path d="M4 14v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></svg>' },
+    'boots_2': { name: "Demir Çizme", category: 'Zırh', subCategory: 'Ayakkabı', baseRarity: 'common', requiredLevel: 8, stats: { armor: 7 }, buyPrice: 180, sellPrice: 90, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-gray-500"><path d="M6 14a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H6Z"/><path d="M4 14v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></svg>' },
+    'boots_3': { name: "Gezgin Botları", category: 'Zırh', subCategory: 'Ayakkabı', baseRarity: 'rare', requiredLevel: 11, stats: { armor: 4, speed: 5 }, buyPrice: 400, sellPrice: 200, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-green-600"><path d="M6 14a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H6Z"/><path d="M4 14v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></svg>' },
+    'boots_4': { name: "Sessizlik Çizmeleri", category: 'Zırh', subCategory: 'Ayakkabı', baseRarity: 'rare', requiredLevel: 17, stats: { armor: 6, dodge: 4 }, buyPrice: 0, sellPrice: 420, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-violet-500"><path d="M6 14a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H6Z"/><path d="M4 14v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></svg>' },
+    'boots_5': { name: "Uçan Sandaletler", category: 'Zırh', subCategory: 'Ayakkabı', baseRarity: 'epic', requiredLevel: 25, stats: { armor: 10, speed: 10, dodge: 5 }, buyPrice: 0, sellPrice: 1500, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-cyan-300"><path d="M6 14a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H6Z"/><path d="M4 14v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></svg>' },
+
+    // -- Eldiven
+    'gloves_1': { name: "Kumaş Eldiven", category: 'Zırh', subCategory: 'Eldiven', baseRarity: 'common', requiredLevel: 2, stats: { armor: 1 }, buyPrice: 20, sellPrice: 10, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-gray-300"><path d="M17 11.5V9a2 2 0 0 0-2-2h-5a2 2 0 0 0-2 2v2.5"/><path d="M17 11.5a2 2 0 0 1-2 2h-5a2 2 0 0 1-2-2"/><path d="M4 14v-2.5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2V14"/></svg>' },
+    'gloves_2': { name: "Demir Eldiven", category: 'Zırh', subCategory: 'Eldiven', baseRarity: 'common', requiredLevel: 7, stats: { armor: 5 }, buyPrice: 140, sellPrice: 70, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-gray-500"><path d="M17 11.5V9a2 2 0 0 0-2-2h-5a2 2 0 0 0-2 2v2.5"/><path d="M17 11.5a2 2 0 0 1-2 2h-5a2 2 0 0 1-2-2"/><path d="M4 14v-2.5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2V14"/><path d="M8 18h8"/></svg>' },
+    'gloves_3': { name: "Güç Eldivenleri", category: 'Zırh', subCategory: 'Eldiven', baseRarity: 'rare', requiredLevel: 12, stats: { armor: 4, damage: 5 }, buyPrice: 480, sellPrice: 240, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-red-500"><path d="M17 11.5V9a2 2 0 0 0-2-2h-5a2 2 0 0 0-2 2v2.5"/><path d="M17 11.5a2 2 0 0 1-2 2h-5a2 2 0 0 1-2-2"/><path d="M4 14v-2.5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2V14"/><path d="M8 18h8"/></svg>' },
+    'gloves_4': { name: "Hırsız Eldiveni", category: 'Zırh', subCategory: 'Eldiven', baseRarity: 'rare', requiredLevel: 16, stats: { armor: 3, dodge: 3 }, buyPrice: 0, sellPrice: 350, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-gray-700"><path d="M17 11.5V9a2 2 0 0 0-2-2h-5a2 2 0 0 0-2 2v2.5"/><path d="M17 11.5a2 2 0 0 1-2 2h-5a2 2 0 0 1-2-2"/><path d="M4 14v-2.5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2V14"/></svg>' },
+    'gloves_5': { name: "Devlerin Elleri", category: 'Zırh', subCategory: 'Eldiven', baseRarity: 'epic', requiredLevel: 27, stats: { armor: 10, damage: 8, hp: 40 }, buyPrice: 0, sellPrice: 1600, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-orange-600"><path d="M17 11.5V9a2 2 0 0 0-2-2h-5a2 2 0 0 0-2 2v2.5"/><path d="M17 11.5a2 2 0 0 1-2 2h-5a2 2 0 0 1-2-2"/><path d="M4 14v-2.5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2V14"/><path d="M8 18h8"/></svg>' },
+
+    // =================================================================================
+    // EKLENTİLER
+    // =================================================================================
+    // -- Kolye
+    'necklace_1': { name: "Sağlık Tılsımı", category: 'Eklenti', subCategory: 'Kolye', baseRarity: 'common', requiredLevel: 5, stats: { hp: 50 }, buyPrice: 200, sellPrice: 100, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-red-400"><path d="M12 22a7 7 0 0 0 7-7h-2a5 5 0 0 1-5 5 5 5 0 0 1-5-5H5a7 7 0 0 0 7 7z"/><path d="M5 15a7 7 0 0 0 14 0h-2a5 5 0 0 1-10 0z"/><path d="M12 12h.01"/></svg>' },
+    'necklace_2': { name: "Mana Kolyesi", category: 'Eklenti', subCategory: 'Kolye', baseRarity: 'common', requiredLevel: 10, stats: { mana: 40 }, buyPrice: 200, sellPrice: 100, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-blue-400"><path d="M12 22a7 7 0 0 0 7-7h-2a5 5 0 0 1-5 5 5 5 0 0 1-5-5H5a7 7 0 0 0 7 7z"/><path d="M5 15a7 7 0 0 0 14 0h-2a5 5 0 0 1-10 0z"/><circle cx="12" cy="12" r="3"/></svg>' },
+    'necklace_3': { name: "Savaşçı Kolyesi", category: 'Eklenti', subCategory: 'Kolye', baseRarity: 'rare', requiredLevel: 15, stats: { damage: 5, hp: 30 }, buyPrice: 600, sellPrice: 300, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-orange-500"><path d="M12 22a7 7 0 0 0 7-7h-2a5 5 0 0 1-5 5 5 5 0 0 1-5-5H5a7 7 0 0 0 7 7z"/><path d="M5 15a7 7 0 0 0 14 0h-2a5 5 0 0 1-10 0z"/><path d="m9 12 6-6"/></svg>' },
+    'necklace_4': { name: "Koruma Amuleti", category: 'Eklenti', subCategory: 'Kolye', baseRarity: 'rare', requiredLevel: 20, stats: { damageReduction: 3, armor: 5 }, buyPrice: 0, sellPrice: 550, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-cyan-400"><path d="M12 22a7 7 0 0 0 7-7h-2a5 5 0 0 1-5 5 5 5 0 0 1-5-5H5a7 7 0 0 0 7 7z"/><path d="M5 15a7 7 0 0 0 14 0h-2a5 5 0 0 1-10 0z"/><path d="M12 14a2 2 0 0 0-2 2v2h4v-2a2 2 0 0 0-2-2z"/></svg>' },
+    'necklace_5': { name: "Kralın Yadigarı", category: 'Eklenti', subCategory: 'Kolye', baseRarity: 'legendary', requiredLevel: 30, stats: { damage: 10, hp: 100, damageReduction: 2 }, buyPrice: 0, sellPrice: 2800, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-yellow-400"><path d="M12 22a7 7 0 0 0 7-7h-2a5 5 0 0 1-5 5 5 5 0 0 1-5-5H5a7 7 0 0 0 7 7z"/><path d="M5 15a7 7 0 0 0 14 0h-2a5 5 0 0 1-10 0z"/><path d="m10 9 2 3 2-3"/><path d="m12 12-2 3h4l-2-3z"/></svg>' },
+
+    // -- Bilezik
+    'bracelet_1': { name: "Deri Bileklik", category: 'Eklenti', subCategory: 'Bilezik', baseRarity: 'common', requiredLevel: 4, stats: { hp: 20 }, buyPrice: 80, sellPrice: 40, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-yellow-700"><path d="M10 17a5 5 0 0 1-5-5 5 5 0 0 1 5-5h1a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-1z"/></svg>' },
+    'bracelet_2': { name: "Hız Bileziği", category: 'Eklenti', subCategory: 'Bilezik', baseRarity: 'common', requiredLevel: 9, stats: { speed: 5 }, buyPrice: 280, sellPrice: 140, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-blue-400"><path d="M10 17a5 5 0 0 1-5-5 5 5 0 0 1 5-5h1a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-1z"/><path d="M7 17a2.5 2.5 0 0 1-2.5-2.5 2.5 2.5 0 0 1 2.5-2.5h1a2.5 2.5 0 0 1 2.5 2.5 2.5 2.5 0 0 1-2.5 2.5h-1z"/></svg>' },
+    'bracelet_3': { name: "Güç Bilekliği", category: 'Eklenti', subCategory: 'Bilezik', baseRarity: 'rare', requiredLevel: 13, stats: { damage: 4 }, buyPrice: 520, sellPrice: 260, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-red-500"><path d="M10 17a5 5 0 0 1-5-5 5 5 0 0 1 5-5h1a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-1z"/></svg>' },
+    'bracelet_4': { name: "Can Taşı Bilekliği", category: 'Eklenti', subCategory: 'Bilezik', baseRarity: 'rare', requiredLevel: 19, stats: { hp: 120 }, buyPrice: 0, sellPrice: 600, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-green-500"><path d="M10 17a5 5 0 0 1-5-5 5 5 0 0 1 5-5h1a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-1z"/><path d="M7 17a2.5 2.5 0 0 1-2.5-2.5 2.5 2.5 0 0 1 2.5-2.5h1a2.5 2.5 0 0 1 2.5 2.5 2.5 2.5 0 0 1-2.5 2.5h-1z"/></svg>' },
+    'bracelet_5': { name: "Kaderin Kelepçesi", category: 'Eklenti', subCategory: 'Bilezik', baseRarity: 'epic', requiredLevel: 27, stats: { damage: 8, speed: 8 }, buyPrice: 0, sellPrice: 1800, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-purple-500"><path d="M10 17a5 5 0 0 1-5-5 5 5 0 0 1 5-5h1a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-1z"/><path d="M7 17a2.5 2.5 0 0 1-2.5-2.5 2.5 2.5 0 0 1 2.5-2.5h1a2.5 2.5 0 0 1 2.5 2.5 2.5 2.5 0 0 1-2.5 2.5h-1z"/></svg>' },
+
+    // -- Küpe
+    'earring_1': { name: "Basit Halka Küpe", category: 'Eklenti', subCategory: 'Küpe', baseRarity: 'common', requiredLevel: 3, stats: { dodge: 1 }, buyPrice: 90, sellPrice: 45, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-gray-300"><circle cx="12" cy="5" r="3"/><path d="M10 12a5 5 0 0 0 5 5h.5a3.5 3.5 0 0 1 3.5 3.5V21a2 2 0 0 1-2 2h-11a2 2 0 0 1-2-2v-1.5a3.5 3.5 0 0 1 3.5-3.5H9a5 5 0 0 0 5-5z"/></svg>' },
+    'earring_2': { name: "Bilgelik Küpesi", category: 'Eklenti', subCategory: 'Küpe', baseRarity: 'common', requiredLevel: 8, stats: { mana: 30 }, buyPrice: 220, sellPrice: 110, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-purple-400"><circle cx="12" cy="5" r="3"/><path d="M10 12a5 5 0 0 0 5 5h.5a3.5 3.5 0 0 1 3.5 3.5V21a2 2 0 0 1-2 2h-11a2 2 0 0 1-2-2v-1.5a3.5 3.5 0 0 1 3.5-3.5H9a5 5 0 0 0 5-5z"/></svg>' },
+    'earring_3': { name: "Keskin Göz Küpesi", category: 'Eklenti', subCategory: 'Küpe', baseRarity: 'rare', requiredLevel: 12, stats: { speed: 4, dodge: 2 }, buyPrice: 450, sellPrice: 225, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-cyan-400"><circle cx="12" cy="5" r="3"/><path d="M10 12a5 5 0 0 0 5 5h.5a3.5 3.5 0 0 1 3.5 3.5V21a2 2 0 0 1-2 2h-11a2 2 0 0 1-2-2v-1.5a3.5 3.5 0 0 1 3.5-3.5H9a5 5 0 0 0 5-5z"/></svg>' },
+    'earring_4': { name: "Kanlı Yakut Küpe", category: 'Eklenti', subCategory: 'Küpe', baseRarity: 'rare', requiredLevel: 18, stats: { hp: 80, damage: 3 }, buyPrice: 0, sellPrice: 580, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-red-500"><circle cx="12" cy="5" r="3"/><path d="M10 12a5 5 0 0 0 5 5h.5a3.5 3.5 0 0 1 3.5 3.5V21a2 2 0 0 1-2 2h-11a2 2 0 0 1-2-2v-1.5a3.5 3.5 0 0 1 3.5-3.5H9a5 5 0 0 0 5-5z"/></svg>' },
+    'earring_5': { name: "Fırtına Gözü", category: 'Eklenti', subCategory: 'Küpe', baseRarity: 'epic', requiredLevel: 26, stats: { damage: 7, speed: 7 }, buyPrice: 0, sellPrice: 1700, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-yellow-400"><circle cx="12" cy="5" r="3"/><path d="M10 12a5 5 0 0 0 5 5h.5a3.5 3.5 0 0 1 3.5 3.5V21a2 2 0 0 1-2 2h-11a2 2 0 0 1-2-2v-1.5a3.5 3.5 0 0 1 3.5-3.5H9a5 5 0 0 0 5-5z"/></svg>' },
+
+    // -- Kemer
+    'belt_1': { name: "Basit Kemer", category: 'Eklenti', subCategory: 'Kemer', baseRarity: 'common', requiredLevel: 5, stats: { hp: 30 }, buyPrice: 100, sellPrice: 50, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-yellow-700"><path d="M3 12h18M5 12V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v5"/><path d="M5 12v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/></svg>' },
+    'belt_2': { name: "Takviyeli Kemer", category: 'Eklenti', subCategory: 'Kemer', baseRarity: 'common', requiredLevel: 10, stats: { armor: 3, hp: 40 }, buyPrice: 250, sellPrice: 125, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-gray-400"><path d="M3 12h18M5 12V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v5"/><path d="M5 12v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/><path d="M12 7V2"/><path d="M12 17v5"/></svg>' },
+    'belt_3': { name: "Metanet Kemeri", category: 'Eklenti', subCategory: 'Kemer', baseRarity: 'rare', requiredLevel: 15, stats: { damageReduction: 3 }, buyPrice: 700, sellPrice: 350, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-blue-500"><path d="M3 12h18M5 12V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v5"/><path d="M5 12v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/><path d="M12 7V2"/><path d="M12 17v5"/></svg>' },
+    'belt_4': { name: "Dev Kemeri", category: 'Eklenti', subCategory: 'Kemer', baseRarity: 'epic', requiredLevel: 22, stats: { hp: 150, damage: 5 }, buyPrice: 0, sellPrice: 1100, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-red-600"><path d="M3 12h18M5 12V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v5"/><path d="M5 12v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/><path d="M12 7V2"/><path d="M12 17v5"/></svg>' },
+    'belt_5': { name: "Titan Kuşağı", category: 'Eklenti', subCategory: 'Kemer', baseRarity: 'legendary', requiredLevel: 33, stats: { hp: 200, damageReduction: 4 }, buyPrice: 0, sellPrice: 3000, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-purple-500"><path d="M3 12h18M5 12V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v5"/><path d="M5 12v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/><path d="M12 7V2"/><path d="M12 17v5"/></svg>' },
+
+    // -- Binek
+    'mount_1': { name: "Yaşlı At", category: 'Eklenti', subCategory: 'Binek', baseRarity: 'common', requiredLevel: 10, stats: { travelTimeReduction: 5 }, buyPrice: 1000, sellPrice: 500, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-yellow-700"><path d="M12 2a2 2 0 0 0-2 2v2h4V4a2 2 0 0 0-2-2z"/><path d="M4 14s1-1 4-1 5 2 8 2 4-1 4-1V6s-1 1-4 1-5-2-8-2-4 1-4 1z"/><path d="M4 6v8"/><path d="M20 6v8"/></svg>' },
+    'mount_2': { name: "Atik At", category: 'Eklenti', subCategory: 'Binek', baseRarity: 'rare', requiredLevel: 15, stats: { travelTimeReduction: 10 }, buyPrice: 5000, sellPrice: 2500, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-yellow-600"><path d="M12 2a2 2 0 0 0-2 2v2h4V4a2 2 0 0 0-2-2z"/><path d="M4 14s1-1 4-1 5 2 8 2 4-1 4-1V6s-1 1-4 1-5-2-8-2-4 1-4 1z"/><path d="M4 6v8"/><path d="M20 6v8"/><path d="M8 18h8"/></svg>' },
+    'mount_3': { name: "Zırhlı Savaş Atı", category: 'Eklenti', subCategory: 'Binek', baseRarity: 'rare', requiredLevel: 20, stats: { travelTimeReduction: 8, armor: 10 }, buyPrice: 8000, sellPrice: 4000, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-gray-500"><path d="M12 2a2 2 0 0 0-2 2v2h4V4a2 2 0 0 0-2-2z"/><path d="M4 14s1-1 4-1 5 2 8 2 4-1 4-1V6s-1 1-4 1-5-2-8-2-4 1-4 1z"/><path d="M4 6v8"/><path d="M20 6v8"/><path d="M8 18h8"/></svg>' },
+    'mount_4': { name: "Bozkurt", category: 'Eklenti', subCategory: 'Binek', baseRarity: 'epic', requiredLevel: 25, stats: { travelTimeReduction: 15, damage: 5 }, buyPrice: 0, sellPrice: 7000, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-cyan-200"><path d="M12 2a2 2 0 0 0-2 2v2h4V4a2 2 0 0 0-2-2z"/><path d="M4 14s1-1 4-1 5 2 8 2 4-1 4-1V6s-1 1-4 1-5-2-8-2-4 1-4 1z"/><path d="M4 6v8"/><path d="M20 6v8"/><path d="M12 14v4"/></svg>' },
+    'mount_5': { name: "Gryphon", category: 'Eklenti', subCategory: 'Binek', baseRarity: 'legendary', requiredLevel: 35, stats: { travelTimeReduction: 25, dodge: 5 }, buyPrice: 0, sellPrice: 15000, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-purple-300"><path d="M12 2a2 2 0 0 0-2 2v2h4V4a2 2 0 0 0-2-2z"/><path d="M4 14s1-1 4-1 5 2 8 2 4-1 4-1V6s-1 1-4 1-5-2-8-2-4 1-4 1z"/><path d="M4 6v8"/><path d="M20 6v8"/><path d="m6 18 6-4 6 4"/></svg>' },
+    
+    // -- Dövme
+    'tattoo_1': { name: "Savaşçı Dövmesi", category: 'Eklenti', subCategory: 'Dövme', baseRarity: 'common', requiredLevel: 6, stats: { hp: 40 }, buyPrice: 180, sellPrice: 90, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-gray-400"><path d="M12 22s-8-4.5-8-12V5l8-3 8 3v5c0 7.5-8 12-8 12z"/><path d="m9 12 2 2 4-4"/></svg>' },
+    'tattoo_2': { name: "Hız Dövmesi", category: 'Eklenti', subCategory: 'Dövme', baseRarity: 'common', requiredLevel: 9, stats: { speed: 4 }, buyPrice: 260, sellPrice: 130, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-blue-400"><path d="m12 12-3-3 3-3 3 3-3 3z"/><path d="m20.5 10.9-3-3a.5.5 0 0 0-.7 0l-3 3c-.2.2-.2.5 0 .7l3 3a.5.5 0 0 0 .7 0l3-3a.5.5 0 0 0 0-.7z"/><path d="m3.5 10.9 3-3a.5.5 0 0 1 .7 0l3 3c.2.2.2.5 0 .7l-3 3a.5.5 0 0 1-.7 0l-3-3a.5.5 0 0 1 0-.7z"/></svg>' },
+    'tattoo_3': { name: "Yılan Dövmesi", category: 'Eklenti', subCategory: 'Dövme', baseRarity: 'rare', requiredLevel: 14, stats: { dodge: 4 }, buyPrice: 650, sellPrice: 325, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-green-500"><path d="M6.1 2.3a1 1 0 0 1 1.3.5l.3 1.2a1 1 0 0 0 1.3.5l1.2-.3a1 1 0 0 1 1.1.9l-.2 1.3a1 1 0 0 0 .6 1.1l1.3.2a1 1 0 0 1 .6 1.3l-1.2.3a1 1 0 0 0-.5 1.3l.3 1.2a1 1 0 0 1-.9 1.1l-1.3-.2a1 1 0 0 0-1.1.6l-.2 1.3a1 1 0 0 1-1.3.6l-.3-1.2a1 1 0 0 0-1.3-.5l-1.2.3a1 1 0 0 1-1.1-.9l.2-1.3a1 1 0 0 0-.6-1.1l-1.3-.2a1 1 0 0 1-.6-1.3l1.2-.3a1 1 0 0 0 .5-1.3l-.3-1.2a1 1 0 0 1 .9-1.1l1.3.2a1 1 0 0 0 1.1-.6z"/><path d="m14 16 2-2-2-2"/><path d="m10 16-2-2 2-2"/></svg>' },
+    'tattoo_4': { name: "Canavar Gözü Dövmesi", category: 'Eklenti', subCategory: 'Dövme', baseRarity: 'epic', requiredLevel: 22, stats: { damage: 6, hp: 50 }, buyPrice: 0, sellPrice: 1200, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-purple-500"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>' },
+    'tattoo_5': { name: "Ejderha Damgası", category: 'Eklenti', subCategory: 'Dövme', baseRarity: 'legendary', requiredLevel: 30, stats: { damage: 8, damageReduction: 2, hp: 80 }, buyPrice: 0, sellPrice: 2900, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-red-600"><path d="M4.5 16.5c-2.1-2.4-2.8-5.8.2-8C8.3 4.9 13.2 4 16 4c.7 0 1.3.1 1.9.2"/><path d="M20.5 7.5c2.2 2.4 2.8 5.8-.2 8-3.6 3.6-8.5 4.5-11.3 4.5-.7 0-1.3-.1-1.9-.2"/><path d="m15 14.5-3-3 3-3"/><path d="m9 9.5 3 3-3 3"/></svg>' },
+
+    // -- Evcil Hayvan
+    'pet_1': { name: "Sokak Kedisi", category: 'Eklenti', subCategory: 'Evcil Hayvan', baseRarity: 'common', requiredLevel: 5, stats: { dodge: 2 }, buyPrice: 500, sellPrice: 250, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-gray-400"><path d="M12 12c-2.2 0-4-1.8-4-4s1.8-4 4-4 4 1.8 4 4-1.8 4-4 4z"/><path d="M12 12v3a4 4 0 0 1-4 4H4v-3a4 4 0 0 1 4-4h4z"/></svg>' },
+    'pet_2': { name: "Sincap", category: 'Eklenti', subCategory: 'Evcil Hayvan', baseRarity: 'common', requiredLevel: 8, stats: { speed: 3 }, buyPrice: 750, sellPrice: 375, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-yellow-700"><path d="M16 8a4 4 0 0 0-4-4h-1a4 4 0 0 0-4 4v2"/><path d="M16 14a4 4 0 0 0-4-4h-1a4 4 0 0 0-4 4v2"/><path d="M12 22a4 4 0 0 0 4-4v-2a4 4 0 0 0-4-4h-1a4 4 0 0 0-4 4v2a4 4 0 0 0 4 4z"/></svg>' },
+    'pet_3': { name: "Avcı Şahini", category: 'Eklenti', subCategory: 'Evcil Hayvan', baseRarity: 'rare', requiredLevel: 15, stats: { damage: 5, speed: 2 }, buyPrice: 2500, sellPrice: 1250, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-blue-300"><path d="M12 2c-3.3 0-6 2.7-6 6v2c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V8c0-3.3-2.7-6-6-6z"/><path d="M12 12v3a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2v-3"/><path d="M12 12v3a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2v-3"/></svg>' },
+    'pet_4': { name: "Buz Kurdu", category: 'Eklenti', subCategory: 'Evcil Hayvan', baseRarity: 'epic', requiredLevel: 24, stats: { damage: 8, hp: 60 }, buyPrice: 0, sellPrice: 4000, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-cyan-200"><path d="M12 12c-2.2 0-4-1.8-4-4s1.8-4 4-4 4 1.8 4 4-1.8 4-4 4z"/><path d="M12 12v3a4 4 0 0 1-4 4H4v-3a4 4 0 0 1 4-4h4z"/><path d="M12 12v3a4 4 0 0 0 4 4h4v-3a4 4 0 0 0-4-4h-4z"/></svg>' },
+    'pet_5': { name: "Alev Anka Kuşu", category: 'Eklenti', subCategory: 'Evcil Hayvan', baseRarity: 'legendary', requiredLevel: 35, stats: { damage: 12, hp: 100, damageReduction: 1 }, buyPrice: 0, sellPrice: 9000, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-orange-500"><path d="M12 2c-3.3 0-6 2.7-6 6v2c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V8c0-3.3-2.7-6-6-6z"/><path d="M12 12v3a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2v-3"/><path d="M12 12v3a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2v-3"/><path d="M7 22h10"/><path d="m9 18 3-3 3 3"/></svg>' },
+
+    // =================================================================================
+    // CANAVAR PARÇALARI
+    // =================================================================================
+    'monster_1': { name: "Goblin Kulağı", category: 'Canavar Parçası', baseRarity: 'common', requiredLevel: 0, buyPrice: 0, sellPrice: 10, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-green-700"><path d="M6 11.5a5.5 5.5 0 0 1 11 0C17 16 12 22 12 22s-5-6-5-10.5Z"/><path d="M14.5 9a2.5 2.5 0 0 0-5 0"/></svg>' },
+    'monster_2': { name: "Kurt Postu", category: 'Canavar Parçası', baseRarity: 'common', requiredLevel: 0, buyPrice: 0, sellPrice: 15, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-gray-400"><path d="M12 12c-2.2 0-4-1.8-4-4s1.8-4 4-4 4 1.8 4 4-1.8 4-4 4z"/><path d="M12 12v3a4 4 0 0 1-4 4H4v-3a4 4 0 0 1 4-4h4z"/></svg>' },
+    'monster_3': { name: "Dev Gözü", category: 'Canavar Parçası', baseRarity: 'uncommon', requiredLevel: 0, buyPrice: 0, sellPrice: 50, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-blue-300"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>' },
+    'monster_4': { name: "Wyvern Zehiri", category: 'Canavar Parçası', baseRarity: 'rare', requiredLevel: 0, buyPrice: 0, sellPrice: 110, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-purple-600"><path d="M8 20a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V8H8v12Z"/><path d="M5.4 5.4a4 4 0 0 1 5.2 0L12 6.8l1.4-1.4a4 4 0 1 1 5.2 5.2L12 18l-6.6-6.6a4 4 0 0 1 0-5.2Z"/></svg>' },
+    'monster_5': { name: "Minotor Boynuzu", category: 'Canavar Parçası', baseRarity: 'uncommon', requiredLevel: 0, buyPrice: 0, sellPrice: 90, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-yellow-700"><path d="M3 3a2 2 0 0 1 4 0L12 9l5-6a2 2 0 1 1 4 0v5a8 8 0 0 1-8 8 8 8 0 0 1-8-8V3Z"/></svg>' },
+    'monster_6': { name: "Hayalet Özü", category: 'Canavar Parçası', baseRarity: 'epic', requiredLevel: 0, buyPrice: 0, sellPrice: 175, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-indigo-200"><path d="M12 2a4 4 0 0 0-4 4c0 1.6.8 2.9 2 3.7V12h-2v4h4v-4h-2V9.7c1.2-.8 2-2.1 2-3.7a4 4 0 0 0-4-4Z"/><path d="M10.5 16a1.5 1.5 0 0 0 3 0"/><path d="M6.5 16a1.5 1.5 0 0 0 3 0"/><path d="M14.5 16a1.5 1.5 0 0 0 3 0"/></svg>' },
+    'monster_7': { name: "Ejderha Pulu", category: 'Canavar Parçası', baseRarity: 'legendary', requiredLevel: 0, buyPrice: 0, sellPrice: 500, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-orange-500"><path d="m2 14 4.1 4.1c.3.3.7.4 1.1.4h9.6c.4 0 .8-.1 1.1-.4L22 14"/></svg>' }
+};
+
         let app, auth, db;
         try {
             app = initializeApp(firebaseConfig);
@@ -804,7 +980,6 @@
         const globalSettingsBtn = document.getElementById('global-settings-button'), closeSettingsModalBtn = document.getElementById('close-settings-modal'), logoutBtn = document.getElementById('logout-button');
         const redeemCodeButton = document.getElementById('redeem-code-button'), giftCodeMessage = document.getElementById('gift-code-message');
         const characterCreationForm = document.getElementById('character-creation-form'), createCharacterBtn = document.getElementById('create-character-button');
-        const resetCharWarning = document.getElementById('reset-char-warning'), resetCharacterBtn = document.getElementById('reset-character-button');
         const nameValidationMessage = document.getElementById('name-validation-message');
         const playerProfileButton = document.getElementById('player-profile-button'), closeCharacterSheetButton = document.getElementById('close-character-sheet-button');
         const statTooltip = document.getElementById('stat-tooltip');
@@ -815,7 +990,11 @@
         const chestPlayerInventory = document.getElementById('chest-player-inventory');
         const chestHouseInventory = document.getElementById('chest-house-inventory');
         const chestPageButtons = document.querySelectorAll('.chest-page-btn');
+        const wardrobeScreen = document.getElementById('wardrobe-screen');
+        const openWardrobeButton = document.getElementById('open-wardrobe-button');
+        const confirmWardrobeChangeButton = document.getElementById('confirm-wardrobe-change-button');
         
+        let selectedWardrobeGender, selectedWardrobeSkinColor, selectedWardrobeHairColor;
         let currentUserData = null, unsubscribeUser;
         let isResettingCharacter = false;
         let statClickTracker = {};
@@ -826,9 +1005,11 @@
         const hairColors = ['#2C222B', '#5D4037', '#A16E4B', '#B8860B', '#F8F8FF', '#D2691E'];
 
         let currentMarketSubCategory = null;
+        let isInitialLoad = true; // << YENİ EKLENEN DEĞİŞKEN
 
         // YENİ: Alt kategori konfigürasyonu
         const SUB_CATEGORIES = {
+            'Silah': ['Kısa kılıç', 'Uzun kılıç', 'Hançer', 'Balta', 'Topuz', 'Menzilliler', 'Asa', 'Büyü kitabı'],
             'Zırh': ['Kask', 'Göğüslük', 'Pantolon', 'Ayakkabı', 'Eldiven'],
             'Eklenti': ['Kolye', 'Bilezik', 'Küpe', 'Kemer', 'Binek', 'Dövme', 'Evcil Hayvan']
         };
@@ -844,6 +1025,19 @@
             'Bilezik': 'bracelet',
             'Küpe': 'earring',
             'Kemer': 'belt'
+        };
+
+        const EQUIPMENT_SLOT_PLACEHOLDERS = {
+            weapon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="w-10 h-10 opacity-20"><path d="M14.5 17.5 3 6V3h3l11.5 11.5"/><path d="m21 15-6-6"/><path d="M3.5 17.5 9 12"/><path d="M15 3.5 12 9"/></svg>',
+            helmet: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="w-10 h-10 opacity-20"><path d="M12 2a4 4 0 0 0-4 4v2h8V6a4 4 0 0 0-4-4Z"/><path d="M18 12h-1.3a2 2 0 0 1-1.9-2.8l1.1-3.9a1 1 0 0 0-1-1.2h-4.8a1 1 0 0 0-1 1.2l1.1 3.8a2 2 0 0 1-2 2.8H6"/><path d="M12 22a4 4 0 0 0 4-4h-8a4 4 0 0 0 4 4Z"/></svg>',
+            chest: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="w-10 h-10 opacity-20"><path d="M21 15a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M6 10V8a6 6 0 0 1 12 0v2"/></svg>',
+            pants: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="w-10 h-10 opacity-20"><path d="M12 2v20"/><path d="M4 2v20"/><path d="M20 2v20"/><path d="M5 2h14a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z"/></svg>',
+            boots: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="w-10 h-10 opacity-20"><path d="M6 14a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H6Z"/><path d="M4 14v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></svg>',
+            gloves: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="w-10 h-10 opacity-20"><path d="M17 11.5V9a2 2 0 0 0-2-2h-5a2 2 0 0 0-2 2v2.5"/><path d="M17 11.5a2 2 0 0 1-2 2h-5a2 2 0 0 1-2-2"/><path d="M4 14v-2.5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2V14"/><path d="M8 18h8"/></svg>',
+            necklace: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="w-10 h-10 opacity-20"><path d="M12 22a7 7 0 0 0 7-7h-2a5 5 0 0 1-5 5 5 5 0 0 1-5-5H5a7 7 0 0 0 7 7z"/><path d="M5 15a7 7 0 0 0 14 0h-2a5 5 0 0 1-10 0z"/><circle cx="12" cy="12" r="3"/></svg>',
+            bracelet: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="w-10 h-10 opacity-20"><path d="M10 17a5 5 0 0 1-5-5 5 5 0 0 1 5-5h1a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-1z"/><path d="M7 17a2.5 2.5 0 0 1-2.5-2.5 2.5 2.5 0 0 1 2.5-2.5h1a2.5 2.5 0 0 1 2.5 2.5 2.5 2.5 0 0 1-2.5 2.5h-1z"/></svg>',
+            earring: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="w-10 h-10 opacity-20"><circle cx="12" cy="5" r="3"/><path d="M10 12a5 5 0 0 0 5 5h.5a3.5 3.5 0 0 1 3.5 3.5V21a2 2 0 0 1-2 2h-11a2 2 0 0 1-2-2v-1.5a3.5 3.5 0 0 1 3.5-3.5H9a5 5 0 0 0 5-5z"/></svg>',
+            belt: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="w-10 h-10 opacity-20"><path d="M3 12h18M5 12V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v5"/><path d="M5 12v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/><path d="M12 7V2"/><path d="M12 17v5"/></svg>',
         };
         
         let priceChart;
@@ -982,7 +1176,7 @@
                     slot.dataset.inventoryIndex = index;
                     slot.dataset.itemId = item.id;
                     
-                    slot.addEventListener('mouseenter', () => showItemTooltip(item.id, slot));
+                    slot.addEventListener('mouseenter', () => showItemTooltip(item, slot)); // item.id yerine item
                     slot.addEventListener('mouseleave', hideItemTooltip);
                     inventoryGrid.appendChild(slot);
                 }
@@ -994,7 +1188,7 @@
             }
 
             const equipment = currentUserData.equipment || {};
-            for (const slotKey of Object.values(SLOT_TYPE_TO_KEY_MAP)) {
+            for (const slotKey of Object.keys(EQUIPMENT_SLOT_PLACEHOLDERS)) {
                  const slotId = `equip-slot-${slotKey}`;
                  const slotElement = document.getElementById(slotId);
                  if (!slotElement) continue;
@@ -1008,67 +1202,68 @@
                     slotElement.dataset.slotKey = slotKey;
                     slotElement.dataset.itemId = item.id;
 
-                    slotElement.addEventListener('mouseenter', () => showItemTooltip(item.id, slotElement));
+                    slotElement.addEventListener('mouseenter', () => showItemTooltip(item, slotElement)); // item.id yerine item
                     slotElement.addEventListener('mouseleave', hideItemTooltip);
                  } else {
+                    // YENİ: BOŞ SLOTA PLACEHOLDER EKLEME
+                    slotElement.innerHTML = EQUIPMENT_SLOT_PLACEHOLDERS[slotKey];
                     slotElement.draggable = false;
                     slotElement.removeAttribute('data-item-type');
                     slotElement.removeAttribute('data-slot-key');
                     slotElement.removeAttribute('data-item-id');
                  }
             }
+
+            
+
         }
 
         // MARKET TRADE EKRANINI OLUŞTURMA (YENİ)
         function renderMarketTradeScreen() {
-            const mainCategories = [...new Set(Object.values(GAME_ITEMS).map(item => item.category))];
+            const mainCategories = [...new Set(Object.values(GAME_ITEMS).map(item => item.category))].filter(category => category !== 'Canavar Parçası');
             mainCategories.push('Hızlı Sat');
             const mainTabsContainer = document.getElementById('market-category-tabs');
             const subTabsContainer = document.getElementById('market-subcategory-tabs');
+            const marketItemList = document.getElementById('market-item-list');
             mainTabsContainer.innerHTML = '';
 
-            // 1. Ana Kategori Sekmelerini Oluştur
             mainCategories.forEach(category => {
                 const button = document.createElement('button');
                 button.textContent = category;
                 button.className = 'market-category-btn px-4 py-2 rounded-md font-semibold text-gray-300';
-                if (category === currentMarketCategory) {
-                    button.classList.add('active');
-                }
+                if (category === currentMarketCategory) { button.classList.add('active'); }
                 
-                // 2. Ana Kategoriye Tıklama Olayı
                 button.addEventListener('click', () => {
                     currentMarketCategory = category;
-                    // Tüm sekmelerdeki 'active' durumunu temizle ve sadece tıklanana ekle
                     mainTabsContainer.querySelectorAll('.market-category-btn').forEach(btn => btn.classList.remove('active'));
                     button.classList.add('active');
 
+                    // --- DÜZELTME BURADA ---
+                    // Önce her iki ekranı da kontrol et ve gizle
                     marketQuickSellScreen.classList.add('hidden');
-                    document.getElementById('market-item-list').classList.remove('hidden');
+                    marketTradeScreen.classList.add('hidden');
 
                     if (category === 'Hızlı Sat') {
                         subTabsContainer.classList.add('hidden');
-                        document.getElementById('market-item-list').classList.add('hidden');
-                        marketQuickSellScreen.classList.remove('hidden');
+                        marketQuickSellScreen.classList.remove('hidden'); // Sadece Hızlı Sat ekranını göster
                         renderQuickSellScreen();
-                        return; // Hızlı Sat için işlemi burada bitir
+                        return;
                     }
+                    
+                    // Diğer tüm kategoriler için normal market ekranını göster
+                    marketTradeScreen.classList.remove('hidden'); 
 
-                    // 3. Alt Kategorileri Kontrol Et ve Oluştur
                     if (SUB_CATEGORIES[category]) {
                         subTabsContainer.innerHTML = '';
                         subTabsContainer.classList.remove('hidden');
-                        currentMarketSubCategory = SUB_CATEGORIES[category][0]; // Varsayılan olarak ilk alt kategoriyi seç
+                        currentMarketSubCategory = SUB_CATEGORIES[category][0]; 
 
                         SUB_CATEGORIES[category].forEach(subCategory => {
                             const subButton = document.createElement('button');
                             subButton.textContent = subCategory;
                             subButton.className = 'market-category-btn px-3 py-1 rounded-md text-sm font-semibold text-gray-400';
-                            if (subCategory === currentMarketSubCategory) {
-                                subButton.classList.add('active');
-                            }
+                            if (subCategory === currentMarketSubCategory) { subButton.classList.add('active'); }
                             
-                            // Alt kategoriye tıklama olayı
                             subButton.addEventListener('click', () => {
                                 currentMarketSubCategory = subCategory;
                                 subTabsContainer.querySelectorAll('.market-category-btn').forEach(btn => btn.classList.remove('active'));
@@ -1078,7 +1273,6 @@
                             subTabsContainer.appendChild(subButton);
                         });
                     } else {
-                        // Alt kategorisi olmayanlar için alanı gizle
                         subTabsContainer.classList.add('hidden');
                         currentMarketSubCategory = null;
                     }
@@ -1088,10 +1282,9 @@
                 mainTabsContainer.appendChild(button);
             });
             
-            // Başlangıçta doğru alt kategorileri göstermek için
             if (SUB_CATEGORIES[currentMarketCategory]) {
                 mainTabsContainer.querySelector('.active').dispatchEvent(new Event('click'));
-            } else {
+            } else if (currentMarketCategory !== 'Hızlı Sat') {
                  renderMarketItems();
             }
         }
@@ -1107,38 +1300,39 @@
             }, {});
 
             for (const [id, item] of Object.entries(GAME_ITEMS)) {
-                // YENİ FİLTRELEME MANTIĞI
-                const categoryMatch = item.category === currentMarketCategory;
-                let subCategoryMatch = true; // Varsayılan olarak doğru kabul et
-                
-                // Eğer bir alt kategori seçiliyse, eşyanın da o alt kategoride olmasını kontrol et
-                if (currentMarketSubCategory) {
-                    subCategoryMatch = item.subCategory === currentMarketSubCategory;
-                }
-
-                if (categoryMatch && subCategoryMatch) {
-                    const rarity = RARITY_CONFIG[item.rarity] || RARITY_CONFIG.common;
-                    const hasItem = (playerInventoryCounts[id] || 0) > 0;
-                    const itemElement = document.createElement('div');
-                    itemElement.className = 'market-item rounded-lg p-4 flex items-center justify-between gap-4';
+                if (item.buyPrice > 0 && (item.baseRarity === 'common' || item.baseRarity === 'rare')) {
+                    const categoryMatch = item.category === currentMarketCategory;
+                    let subCategoryMatch = true; 
                     
-                    itemElement.innerHTML = `
-                        <div class="rarity-border" style="background: ${rarity.color}; opacity: 0.4;"></div>
-                        <div class="flex items-center gap-3">
-                            <div class="w-12 h-12 flex-shrink-0 bg-gray-900/50 rounded-md flex items-center justify-center">${item.icon}</div>
-                            <div>
-                                <h4 class="font-bold" style="color: ${rarity.color};">${item.name}</h4>
-                                <p class="text-xs text-gray-400">Envanterde: ${playerInventoryCounts[id] || 0}</p>
+                    if (currentMarketSubCategory) {
+                        subCategoryMatch = item.subCategory === currentMarketSubCategory;
+                    }
+
+                    if (categoryMatch && subCategoryMatch) {
+                        const rarity = RARITY_CONFIG[item.baseRarity] || RARITY_CONFIG.common;
+                        const itemElement = document.createElement('div');
+                        itemElement.className = 'market-item rounded-lg p-4 flex items-center justify-between gap-4';
+                        
+                        // "Sat" butonu HTML'den kaldırıldı.
+                        itemElement.innerHTML = `
+                            <div class="rarity-border" style="background: ${rarity.color}; opacity: 0.4;"></div>
+                            <div class="flex items-center gap-3">
+                                <div class="w-12 h-12 flex-shrink-0 bg-gray-900/50 rounded-md flex items-center justify-center">${item.icon}</div>
+                                <div>
+                                    <h4 class="font-bold" style="color: ${rarity.color};">${item.name}</h4>
+                                    <p class="text-xs text-gray-400">Envanterde: ${playerInventoryCounts[id] || 0}</p>
+                                </div>
                             </div>
-                        </div>
-                        <div class="flex flex-col items-end gap-2">
-                            <button data-item-id="${id}" class="buy-item-btn bg-green-600 hover:bg-green-500 text-white font-bold py-1 px-3 rounded-md text-sm transition w-24">Al: ${item.buyPrice}💰</button>
-                            <button data-item-id="${id}" class="sell-item-btn bg-red-600 hover:bg-red-500 text-white font-bold py-1 px-3 rounded-md text-sm transition w-24" ${!hasItem ? 'disabled' : ''}>Sat: ${item.sellPrice}💰</button>
-                        </div>
-                    `;
-                    itemElement.addEventListener('mouseenter', () => showItemTooltip(id, itemElement));
-                    itemElement.addEventListener('mouseleave', hideItemTooltip);
-                    itemListContainer.appendChild(itemElement);
+                            <div class="flex flex-col items-end">
+                                <button data-item-id="${id}" class="buy-item-btn bg-green-600 hover:bg-green-500 text-white font-bold py-1 px-3 rounded-md text-sm transition w-24">Al: ${item.buyPrice}💰</button>
+                            </div>
+                        `;
+
+                        const itemInstance = { id: id, rarity: item.baseRarity };
+                        itemElement.addEventListener('mouseenter', () => showItemTooltip(itemInstance, itemElement));
+                        itemElement.addEventListener('mouseleave', hideItemTooltip);
+                        itemListContainer.appendChild(itemElement);
+                    }
                 }
             }
         }
@@ -1151,10 +1345,10 @@
                 return;
             }
             const userRef = doc(db, "users", auth.currentUser.uid);
+            // ARTIK NADİRLİK BİLGİSİYLE KAYDEDİYORUZ
             const newItemObject = {
                 id: itemId,
-                name: item.name,
-                // Diğer eşya özelliklerini buraya ekleyebilirsiniz.
+                rarity: item.baseRarity 
             };
             try {
                 await updateDoc(userRef, {
@@ -1201,6 +1395,15 @@
         }
 
         async function equipItem(inventoryIndex) {
+            const itemToEquip = currentUserData.inventory[inventoryIndex];
+            if (!itemToEquip) return;
+            
+            const itemData = GAME_ITEMS[itemToEquip.id];
+            if (currentUserData.level < itemData.requiredLevel) {
+                alert(`Bu eşyayı giymek için ${itemData.requiredLevel}. seviye olmalısın!`);
+                return;
+            }
+
             const userRef = doc(db, "users", auth.currentUser.uid);
             
             try {
@@ -1210,34 +1413,33 @@
                     
                     let data = userDoc.data();
                     let inventory = [...data.inventory];
-                    // Firestore'da equipment objesi yoksa, boş olarak oluştur
                     let equipment = data.equipment || { weapon: null, helmet: null, chest: null, pants: null, boots: null, gloves: null, necklace: null, bracelet: null, earring: null, belt: null };
 
-                    const itemToEquip = inventory[inventoryIndex];
-                    if (!itemToEquip) throw "Eşya envanterde bulunamadı.";
-                    
-                    const itemData = GAME_ITEMS[itemToEquip.id];
-                    const slotType = itemData.subCategory || itemData.category; // Silahlar için category, diğerleri için subCategory
-                    const slotKey = SLOT_TYPE_TO_KEY_MAP[slotType];
+                    // ---- GÜNCELLENEN MANTIK BURADA ----
+                    let slotKey;
+                    if (itemData.category === 'Silah') {
+                        slotKey = 'weapon'; // Tüm silah alt kategorileri 'weapon' slotuna gider.
+                    } else {
+                        const slotType = itemData.subCategory;
+                        slotKey = SLOT_TYPE_TO_KEY_MAP[slotType];
+                    }
+                    // ---- GÜNCELLEME SONU ----
 
                     if (!slotKey) throw "Bu eşya giyilemez.";
 
-                    // Mevcut giyili eşyayı envantere geri koy
                     const currentlyEquippedItem = equipment[slotKey];
                     if (currentlyEquippedItem) {
                         inventory.push(currentlyEquippedItem);
                     }
 
-                    // Yeni eşyayı envanterden çıkar
                     inventory.splice(inventoryIndex, 1);
-                    
-                    // Yeni eşyayı giy
                     equipment[slotKey] = itemToEquip;
 
                     transaction.update(userRef, { inventory, equipment });
                 });
             } catch (error) {
                 console.error("Ekipman giyme hatası:", error);
+                alert("Ekipman giyerken bir hata oluştu.");
             }
         }
 
@@ -1303,7 +1505,7 @@
                     const itemData = GAME_ITEMS[item.id];
                     slot.innerHTML = itemData.icon;
                     // EKSİK OLAN TOOLTIP OLAYLARI BURAYA EKLENDİ
-                    slot.addEventListener('mouseenter', () => showItemTooltip(item.id, slot));
+                    slot.addEventListener('mouseenter', () => showItemTooltip(item, slot));
                     slot.addEventListener('mouseleave', hideItemTooltip);
                 }
                 chestPlayerInventory.appendChild(slot);
@@ -1454,12 +1656,12 @@
             priceChart.update();
         }
 
-        function showItemTooltip(itemId, element) {
+        function showItemTooltip(itemInstance, element) {
             clearTimeout(hideTooltipTimeout); // << ÖNCEKİ GİZLEME ZAMANLAYICISINI İPTAL ET
-            const itemData = GAME_ITEMS[itemId];
+            const itemData = GAME_ITEMS[itemInstance.id];
             if (!itemData) return;
 
-            const rarity = RARITY_CONFIG[itemData.rarity] || RARITY_CONFIG.common;
+            const rarity = RARITY_CONFIG[itemInstance.rarity] || RARITY_CONFIG.common;
             
             let statsHtml = '';
             if (itemData.stats) {
@@ -1470,13 +1672,20 @@
                 statsHtml += '</div>';
             }
 
+            let levelReqHtml = '';
+            if (itemData.requiredLevel > 1) {
+                const canEquip = currentUserData.level >= itemData.requiredLevel;
+                levelReqHtml = `<p class="mt-2 ${canEquip ? 'text-gray-400' : 'text-red-500'}">Gerekli Seviye: ${itemData.requiredLevel}</p>`;
+            }
+
             itemTooltip.innerHTML = `
                 <h4 class="font-bold text-lg" style="color: ${rarity.color};">${itemData.name}</h4>
-                <p class="text-sm text-gray-400" style="color: ${rarity.color};">${rarity.name} ${itemData.category}</p>
+                <p class="text-sm" style="color: ${rarity.color};">${rarity.name} ${itemData.subCategory || itemData.category}</p>
                 ${statsHtml}
                 <div class="border-t border-gray-700 mt-2 pt-2">
                     <p class="text-yellow-400">Satış Fiyatı: ${itemData.sellPrice} 💰</p>
                 </div>
+                ${levelReqHtml}
             `;
             
             const rect = element.getBoundingClientRect();
@@ -1498,22 +1707,46 @@
 
         function handleUserLogin(user) {
              if (!user) return;
+             
+             // Eğer daha önceden kalan bir dinleyici varsa temizle
              if (unsubscribeUser) unsubscribeUser();
+
              unsubscribeUser = onSnapshot(doc(db, "users", user.uid), (docSnap) => {
                 if (docSnap.exists()) {
                     currentUserData = docSnap.data();
-                    if (currentUserData.characterCreated && !isResettingCharacter) {
-                        userDisplay.textContent = currentUserData.inGameName || currentUserData.username;
-                        uidDisplay.textContent = user.uid;
-                        updateCharacterSheetUI();
-                        // Market ekranı açıksa yenile
-                        if (!marketTradeScreen.classList.contains('hidden')) {
-                           renderMarketItems();
+                    
+                    // Sadece ilk yüklemede veya karakteri yoksa ekran değiştir.
+                    if (isInitialLoad) {
+                        if (currentUserData.characterCreated && !isResettingCharacter) {
+                            userDisplay.textContent = currentUserData.inGameName || currentUserData.username;
+                            uidDisplay.textContent = user.uid;
+                            showScreen(mainMenuScreen); // SADECE İLK SEFERDE ANA MENÜYÜ GÖSTER
+                        } else {
+                            setupCharacterCreation();
+                            showScreen(characterCreationScreen);
                         }
-                        showScreen(mainMenuScreen);
-                    } else {
-                        setupCharacterCreation();
-                        showScreen(characterCreationScreen);
+                        isInitialLoad = false; // Sonraki güncellemeler için bayrağı kapat
+                    }
+                    
+                    // Sonraki tüm güncellemelerde, ekranı değiştirmek yerine SADECE ARAYÜZÜ YENİLE.
+                    // Karakter sayfası açıksa onu güncelle
+                    if (!characterSheetModal.classList.contains('hidden')) {
+                        updateCharacterSheetUI();
+                    }
+                    // Market ekranı açıksa onu güncelle (özellikle envanter sayısı için)
+                    if (!marketTradeScreen.classList.contains('hidden')) {
+                       renderMarketItems();
+                    }
+                    // Hızlı Sat ekranı açıksa onu güncelle
+                    if(!marketQuickSellScreen.classList.contains('hidden')) {
+                        renderQuickSellScreen();
+                    }
+                    
+                    // Her zaman görünen global UI elemanlarını güncelle
+                    document.getElementById('gold-display').textContent = Math.floor(currentUserData.gold) || 0;
+                    document.getElementById('diamond-display').textContent = currentUserData.diamonds || 0;
+                    if(currentUserData.character) {
+                        updateCharacterPreview('profile-character-preview', currentUserData.character);
                     }
                 }
              });
@@ -1643,11 +1876,7 @@
         logoutBtn.addEventListener('click', () => {
             signOut(auth);
             settingsModal.classList.add('hidden');
-        });
-        resetCharacterBtn.addEventListener('click', () => {
-            isResettingCharacter = true;
-            settingsModal.classList.add('hidden');
-            handleUserLogin(auth.currentUser);
+            isInitialLoad = true; // << YENİ EKLENEN SATIR
         });
         loginTabBtn.addEventListener('click', () => {
             loginTabBtn.classList.add('active');
@@ -1845,6 +2074,95 @@
                 resetCharWarning.textContent = "";
             }
         }
+        function setupWardrobeScreen() {
+            if (!currentUserData || !currentUserData.character) return;
+
+            // 1. Mevcut görünüm bilgilerini al ve sakla
+            const { gender, skinColor, hairColor } = currentUserData.character;
+            selectedWardrobeGender = gender;
+            selectedWardrobeSkinColor = skinColor;
+            selectedWardrobeHairColor = hairColor;
+
+            // 2. Karakter önizlemesini güncelle
+            updateCharacterPreview('wardrobe-character-preview', currentUserData.character);
+
+            // 3. Cinsiyet butonlarını ayarla
+            const genderButtons = document.getElementById('wardrobe-gender-buttons');
+            genderButtons.querySelector('.active')?.classList.remove('active');
+            genderButtons.querySelector(`[data-gender="${gender}"]`).classList.add('active');
+
+            // 4. Renk paletlerini oluştur ve mevcut renkleri seç
+            const skinContainer = document.getElementById('wardrobe-skin-color-swatches');
+            skinContainer.innerHTML = '';
+            skinColors.forEach(color => {
+                const swatch = document.createElement('div');
+                swatch.className = 'color-swatch';
+                if (color === skinColor) swatch.classList.add('selected');
+                swatch.style.backgroundColor = color;
+                swatch.addEventListener('click', () => {
+                    selectedWardrobeSkinColor = color;
+                    skinContainer.querySelector('.selected')?.classList.remove('selected');
+                    swatch.classList.add('selected');
+                    updateCharacterPreview('wardrobe-character-preview', { gender: selectedWardrobeGender, skinColor: selectedWardrobeSkinColor, hairColor: selectedWardrobeHairColor });
+                });
+                skinContainer.appendChild(swatch);
+            });
+
+            const hairContainer = document.getElementById('wardrobe-hair-color-swatches');
+            hairContainer.innerHTML = '';
+            hairColors.forEach(color => {
+                const swatch = document.createElement('div');
+                swatch.className = 'color-swatch';
+                if (color === hairColor) swatch.classList.add('selected');
+                swatch.style.backgroundColor = color;
+                swatch.addEventListener('click', () => {
+                    selectedWardrobeHairColor = color;
+                    hairContainer.querySelector('.selected')?.classList.remove('selected');
+                    swatch.classList.add('selected');
+                    updateCharacterPreview('wardrobe-character-preview', { gender: selectedWardrobeGender, skinColor: selectedWardrobeSkinColor, hairColor: selectedWardrobeHairColor });
+                });
+                hairContainer.appendChild(swatch);
+            });
+            
+            // Cinsiyet butonlarının tıklama olayları
+            genderButtons.querySelectorAll('.gender-btn').forEach(btn => {
+                btn.onclick = (e) => { // onclick kullanarak eski listener'ların üzerine yazıyoruz
+                    selectedWardrobeGender = e.target.dataset.gender;
+                    genderButtons.querySelector('.active').classList.remove('active');
+                    e.target.classList.add('active');
+                    updateCharacterPreview('wardrobe-character-preview', { gender: selectedWardrobeGender, skinColor: selectedWardrobeSkinColor, hairColor: selectedWardrobeHairColor });
+                };
+            });
+
+            // 5. Elmas kontrolü yap ve butonu etkinleştir/devre dışı bırak
+            confirmWardrobeChangeButton.disabled = currentUserData.diamonds < 100;
+        }
+
+        async function applyWardrobeChange() {
+            if (currentUserData.diamonds < 100) {
+                alert("Görünümünü değiştirmek için yeterli elmasın yok! (100 💎 gerekli)");
+                return;
+            }
+            
+            confirmWardrobeChangeButton.disabled = true; // Tekrar tıklamayı önle
+            const userRef = doc(db, "users", auth.currentUser.uid);
+
+            try {
+                await updateDoc(userRef, {
+                    'character.gender': selectedWardrobeGender,
+                    'character.skinColor': selectedWardrobeSkinColor,
+                    'character.hairColor': selectedWardrobeHairColor,
+                    diamonds: increment(-100)
+                });
+                alert("Görünümün başarıyla değiştirildi!");
+                showGameSubScreen(homeScreen); // Eve geri dön
+            } catch (error) {
+                console.error("Görünüm değiştirme hatası:", error);
+                alert("Bir hata oluştu, değişiklikler kaydedilemedi.");
+            } finally {
+                confirmWardrobeChangeButton.disabled = false; // İşlem bitince butonu tekrar aktif et
+            }
+        }
         
         characterCreationForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -1907,6 +2225,14 @@
                 renderChestUI();
             });
         });
+
+        openWardrobeButton.addEventListener('click', () => {
+            setupWardrobeScreen();
+            showGameSubScreen(wardrobeScreen);
+        });
+
+        // Gardırop değişikliklerini onaylama
+        confirmWardrobeChangeButton.addEventListener('click', applyWardrobeChange);
 
         // KARAKTER SAYFASI İÇİN OLAY DİNLEYİCİLERİ
         const characterSheetWindow = document.querySelector('.character-sheet-window');
@@ -2006,7 +2332,7 @@
                     slot.innerHTML = itemData.icon;
                     slot.dataset.inventoryIndex = index; // Orijinal envanterdeki index'ini sakla
                     
-                    slot.addEventListener('mouseenter', () => showItemTooltip(item.id, slot));
+                    slot.addEventListener('mouseenter', () => showItemTooltip(item, slot));
                     slot.addEventListener('mouseleave', hideItemTooltip);
                     
                     quickSellInventoryGrid.appendChild(slot);
@@ -2091,7 +2417,7 @@
                 quickSellConfirmationModal.classList.add('hidden');
             }
         });
-
+        
     </script>
 </body>
 </html>

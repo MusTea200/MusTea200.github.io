@@ -1,0 +1,2097 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer">
+    <title>Köy ve Savaş Oyunu</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/lucide-react@0.378.0/dist/lucide-react.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #1e3a8a 0%, #0c1a3a 100%);
+            overflow-y: hidden;
+            overflow-x: hidden;
+        }
+        .form-container {
+            background: rgba(17, 24, 39, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .tab-button { transition: all 0.3s ease; }
+        .tab-button.active { background-color: #2563eb; color: white; }
+        .tab-button:not(.active) { background-color: transparent; color: #9ca3af; }
+        .btn-primary { background: #2563eb; transition: background-color 0.3s ease; }
+        .btn-primary:hover { background: #1d4ed8; }
+        .btn-primary:disabled { background: #4b5563; cursor: not-allowed; }
+        .hidden { display: none; }
+        .gender-btn.active { background-color: #2563eb; box-shadow: 0 0 10px #2563eb; }
+        .color-swatch { width: 32px; height: 32px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: transform 0.2s ease, border-color 0.2s ease; }
+        .color-swatch:hover { transform: scale(1.1); }
+        .color-swatch.selected { border-color: #ffffff; transform: scale(1.1); }
+        .tooltip { visibility: hidden; opacity: 0; transition: opacity 0.3s; }
+        .has-tooltip:hover .tooltip { visibility: visible; opacity: 1; }
+        
+        .character-sheet-modal { transition: opacity 0.3s ease-in-out; }
+        .character-sheet-window { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease-in-out; }
+        .modal-closed .character-sheet-window {
+            transform-origin: top left;
+            transform: scale(0.8);
+            opacity: 0;
+        }
+        .inventory-slot {
+            background-color: rgba(17, 24, 39, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            aspect-ratio: 1 / 1;
+            transition: background-color 0.2s;
+            position: relative;
+            display: flex; /* İçeriği ortalamak için eklendi */
+            align-items: center;
+            justify-content: center;
+        }
+        .equipment-slot.drag-over {
+            border-color: #3b82f6;
+            box-shadow: 0 0 10px #3b82f6;
+        }
+
+        .inventory-slot:hover { background-color: rgba(30, 41, 59, 0.8); }
+        .exp-bar-fill {
+             background: linear-gradient(90deg, #60a5fa 0%, #2563eb 100%);
+             transition: width 0.5s ease-in-out;
+        }
+        .stat-plus-btn {
+            background-color: #1e40af; color: white;
+            width: 28px; height: 28px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold; font-size: 1.2rem;
+            transition: background-color 0.2s;
+        }
+        .stat-plus-btn:hover:not(:disabled) { background-color: #2563eb; }
+        .stat-plus-btn:disabled { background-color: #374151; cursor: not-allowed; }
+        .stat-info-btn {
+            width: 20px; height: 20px;
+            border-radius: 50%; background-color: #4b5563;
+            color: white; font-size: 0.8rem;
+            display: flex; align-items: center; justify-content: center;
+            cursor: help;
+        }
+        #stat-tooltip {
+            transition: opacity 0.2s ease-in-out;
+            pointer-events: none;
+        }
+        #game-screen {
+            background-image: url('https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?q=80&w=2074&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            width: 100%;
+            height: 100%;
+            position: absolute;
+        }
+        .location-button {
+            background-color: rgba(17, 24, 39, 0.7);
+            backdrop-filter: blur(5px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 1rem;
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            color: white;
+            padding: 1rem;
+        }
+        .location-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(96, 165, 250, 0.5);
+            border-color: rgba(96, 165, 250, 0.8);
+        }
+        .game-sub-screen {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(12, 26, 58, 0.8);
+            backdrop-filter: blur(8px);
+        }
+        .nav-arrow {
+            position: absolute;
+            background: rgba(17, 24, 39, 0.7);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .nav-arrow:hover {
+            background: rgba(30, 64, 175, 0.8);
+            border-color: #60a5fa;
+        }
+
+        #energy-bar-container {
+            width: 352px; /* 5 * 64px (slot) + 4 * 8px (gap) */
+            height: 30px;
+            background-color: rgba(17, 24, 39, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: none;
+            border-top-left-radius: 9999px;
+            border-top-right-radius: 9999px;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+        }
+        #energy-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #fde047 0%, #f59e0b 100%);
+            border-radius: 9999px;
+            transition: width 0.5s ease;
+            position: relative;
+        }
+        #energy-bar-text {
+            position: absolute;
+            left: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #422006;
+            font-weight: bold;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .chest-page-btn.active {
+            background-color: #2563eb;
+        }
+        .upgrade-card {
+            background: rgba(30, 41, 59, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.2s ease;
+        }
+        .upgrade-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0 15px rgba(96, 165, 250, 0.4);
+        }
+        /* Market Trade Screen Styles */
+        #market-trade-screen .market-category-btn {
+            transition: background-color 0.2s, color 0.2s;
+        }
+        #market-trade-screen .market-category-btn.active {
+            background-color: #2563eb;
+            color: white;
+        }
+        /* ... mevcut stilleriniz ... */
+        #market-trade-screen .market-item {
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative; /* Rarity border için eklendi */
+        }
+        
+        /* YENİ EKLENEN STİLLER */
+        .rarity-border {
+            content: '';
+            position: absolute;
+            inset: -1px; /* Kenarlığın tam oturması için */
+            border-radius: 0.5rem; /* .rounded-lg ile aynı */
+            z-index: -1;
+            background: conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops));
+            opacity: 0.6;
+        }
+
+        .inventory-slot.selected {
+            box-shadow: 0 0 10px 2px #ef4444;
+            border-color: #ef4444;
+        }
+        
+        #item-tooltip {
+            transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+            pointer-events: none; /* Tooltip'in fare olaylarını engellememesi için */
+            transform: scale(0.95);
+        }
+        #item-tooltip.visible {
+            opacity: 1;
+            transform: scale(1);
+        }
+    </style>
+</head>
+<body class="text-white">
+
+    <div id="app-container" class="min-h-screen h-screen flex items-center justify-center p-4 relative">
+        <!-- AUTHENTICATION AND CHARACTER CREATION SCREENS (UNCHANGED) -->
+        <div id="auth-screen" class="w-full max-w-md">
+            <div class="form-container rounded-2xl p-8 shadow-2xl">
+                <h1 class="text-3xl font-bold text-center mb-6">Oyun Projesi</h1>
+                <div class="flex border border-gray-700 rounded-lg p-1 mb-6">
+                    <button id="login-tab-button" class="tab-button active w-1/2 rounded-md py-2 font-semibold">Giriş Yap</button>
+                    <button id="register-tab-button" class="tab-button w-1/2 rounded-md py-2 font-semibold">Kayıt Ol</button>
+                </div>
+                <form id="login-form">
+                    <div class="space-y-4">
+                        <input type="text" id="login-username" placeholder="Kullanıcı Adı" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        <input type="password" id="login-password" placeholder="Şifre" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                    </div>
+                    <button type="submit" class="btn-primary w-full text-white font-bold py-3 rounded-lg mt-6">Giriş Yap</button>
+                </form>
+                <form id="register-form" class="hidden">
+                    <div class="space-y-4">
+                        <input type="text" id="register-username" placeholder="Kullanıcı Adı" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        <input type="password" id="register-password" placeholder="Şifre" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                    </div>
+                    <button type="submit" class="btn-primary w-full text-white font-bold py-3 rounded-lg mt-6">Kayıt Ol</button>
+                </form>
+                <p id="auth-message" class="text-center text-red-400 mt-4 h-5"></p>
+                <div class="relative flex py-5 items-center">
+                    <div class="flex-grow border-t border-gray-600"></div><span class="flex-shrink mx-4 text-gray-400">Veya</span><div class="flex-grow border-t border-gray-600"></div>
+                </div>
+                <button id="google-signin-button" class="w-full bg-white text-gray-800 font-semibold py-3 rounded-lg flex items-center justify-center space-x-2 hover:bg-gray-200 transition">
+                    <svg class="w-6 h-6" viewBox="0 0 48 48"><path fill="#4285F4" d="M24 9.5c3.9 0 6.8 1.6 8.4 3.1l6.3-6.3C34.9 2.6 30 .5 24 .5 14.9.5 7.7 5.8 4.4 13.5l7.1 5.5C13.2 13.5 18.2 9.5 24 9.5z"></path><path fill="#34A853" d="M46.5 24.5c0-1.6-.1-3.2-.4-4.7H24v9h12.7c-.5 2.9-2.2 5.4-4.7 7.1l6.3 6.3c3.7-3.4 5.8-8.3 5.8-14z"></path><path fill="#FBBC05" d="M11.5 29.5c-.5-1.5-.8-3.1-.8-4.8s.3-3.3.8-4.8l-7.1-5.5C2.6 18.2.5 22.9.5 28.3c0 5.4 2.1 10.1 5.9 13.5l7.1-5.5c-1.7-1.4-2.8-3.4-3-5.8z"></path><path fill="#EA4335" d="M24 47.5c5.9 0 10.8-1.9 14.4-5.2l-6.3-6.3c-2 1.4-4.5 2.2-7.1 2.2-5.9 0-10.9-4-12.7-9.5l-7.1 5.5C7.7 42.2 14.9 47.5 24 47.5z"></path></svg>
+                    <span>Google ile Giriş Yap</span>
+                </button>
+            </div>
+        </div>
+        <div id="character-creation-screen" class="hidden w-full max-w-2xl">
+            <div class="form-container rounded-2xl p-8 shadow-2xl">
+                <h1 class="text-3xl font-bold text-center mb-6">Karakterini Yarat</h1>
+                <p id="reset-char-warning" class="text-center text-yellow-400 mb-4 h-5"></p>
+                <div class="flex flex-col md:flex-row items-center justify-around gap-8">
+                    <div class="w-48 h-72 bg-gray-900/50 rounded-lg flex items-center justify-center p-2 border border-gray-700">
+                        <svg id="character-preview" viewBox="0 0 200 300" class="w-full h-full">
+                            <g id="character-master-group" transform="translate(-60, -20) scale(1.6)">
+                                <g id="hair-female-back-group" class="hidden"><path id="hair-female-back" fill="#5D4037" d="M80 80 h40 v80 a20,20 0 0 1 -40 0 Z" /></g>
+                                <g id="body-group">
+                                    <g id="body-male">
+                                        <g class="character-skin-part" fill="#e0ac69"><path d="M70 135 h-10 v60 h10 Z" /><path d="M130 135 h10 v60 h-10 Z" /></g>
+                                        <g><path id="outfit-male" fill="#4CAF50" d="M70,135 v60 h60 v-60 c0,-15 -10,-20 -30,-20 s-30,5 -30,20 Z" /><path id="collar-male" fill="#1e3a8a" d="M100,118 a12,8 0 0,1 0,12 a12,8 0 0,1 0,-12 Z" /><path id="pocket-male" fill="#388E3C" d="M105 140 h20 l-10 15 Z" /></g>
+                                    </g>
+                                    <g id="body-female" class="hidden">
+                                        <g class="character-skin-part" fill="#e0ac69"><path d="M72 135 h-10 v60 h10 Z" /><path d="M128 135 h10 v60 h-10 Z" /></g>
+                                        <g><path id="outfit-female" fill="#4CAF50" d="M72,135 C75,160 75,170 72,195 h56 c-3,-25 -3,-35 0,-60 c0,-15 -10,-20 -28,-20 s-28,5 -28,20 Z" /><path id="collar-female" fill="#1e3a8a" d="M100,118 a12,8 0 0,1 0,12 a12,8 0 0,1 0,-12 Z" /><path id="pocket-female" fill="#388E3C" d="M105 140 h20 l-10 15 Z" /></g>
+                                    </g>
+                                </g>
+                                <g id="head-group" transform="translate(0, -5)">
+                                    <path class="character-skin-part" fill="#e0ac69" d="M100,25 C75,25 60,45 60,70 C60,95 75,115 100,115 C125,115 140,95 140,70 C140,45 125,25 100,25 Z" />
+                                    <g fill="white"><circle id="eye-left" cx="90" cy="75" r="6" /><circle id="eye-right" cx="110" cy="75" r="6" /></g>
+                                    <g fill="black"><circle id="pupil-left" cx="90" cy="75" r="3" /><circle id="pupil-right" cx="110" cy="75" r="3" /></g>
+                                    <g id="hair-male-front-group"><path id="hair-male" fill="#5D4037" d="M80,35 L85,20 L90,35 L95,20 L100,35 L105,20 L110,35 L115,20 L120,35 C110,45 90,45 80,35 Z" /></g>
+                                    <g id="hair-female-front-group" class="hidden" transform="translate(0, -16)"><path id="hair-female-front" fill="#5D4037" d="M65,65 C70,45 90,40 100,40 C110,40 130,45 135,65 C125,85 75,85 65,65 Z" /></g>
+                                </g>
+                            </g>
+                        </svg>
+                    </div>
+                    <div class="w-full md:w-1/2">
+                        <form id="character-creation-form" class="space-y-4">
+                            <div id="in-game-name-container">
+                                <label for="character-name-input" class="font-semibold text-gray-300">Oyun İçi Adın</label>
+                                <input type="text" id="character-name-input" placeholder="Maks. 16 karakter" maxlength="16" required class="mt-2 w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <p id="name-validation-message" class="text-red-400 text-sm mt-1 h-4"></p>
+                            </div>
+                            <div id="in-game-name-display" class="hidden">
+                                <label class="font-semibold text-gray-300">Oyun İçi Adın</label>
+                                <p class="mt-2 text-lg font-bold bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-gray-400">
+                                    <span id="locked-in-game-name"></span> (Değiştirilemez)
+                                </p>
+                            </div>
+                            <div><label class="font-semibold text-gray-300">Cinsiyet</label><div class="flex gap-2 mt-2"><button type="button" data-gender="male" class="gender-btn active w-full bg-gray-700 p-2 rounded-lg transition">Erkek</button><button type="button" data-gender="female" class="gender-btn w-full bg-gray-700 p-2 rounded-lg transition">Kadın</button></div></div>
+                            <div><label class="font-semibold text-gray-300">Ten Rengi</label><div id="skin-color-swatches" class="flex gap-2 mt-2 flex-wrap"></div></div>
+                            <div><label class="font-semibold text-gray-300">Saç Rengi</label><div id="hair-color-swatches" class="flex gap-2 mt-2 flex-wrap"></div></div>
+                        </form>
+                    </div>
+                </div>
+                <button id="create-character-button" type="submit" form="character-creation-form" class="btn-primary w-full text-white font-bold py-3 rounded-lg mt-8">Karakteri Oluştur</button>
+            </div>
+        </div>
+        <div id="main-menu-screen" class="hidden text-center">
+            <h1 class="text-5xl font-bold mb-2">Hoş Geldin, <span id="user-display"></span>!</h1>
+            <p class="text-gray-400 mb-12">UID: <span id="uid-display" class="text-xs"></span></p>
+            <div class="space-y-4 flex flex-col items-center">
+                <button id="start-game-button" class="btn-primary w-full max-w-xs text-xl font-bold py-4 px-6 rounded-lg">Oyuna Başla</button>
+            </div>
+        </div>
+        
+        <div id="game-screen" class="hidden">
+            <!-- Village View -->
+            <div id="village-view">
+                 <button id="home-button" class="location-button absolute" style="top: 40%; left: 25%;">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mb-2 mx-auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                    <span class="font-bold">Ev</span>
+                </button>
+                 <button id="arena-button" class="location-button absolute" style="top: 20%; left: 60%;">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mb-2 mx-auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l4 4-1 7 3 3-4 4-7-1 3-3-1-7 4-4z"></path><path d="M12 2l-4 4 1 7-3 3 4 4 7-1-3-3 1-7-4-4z"></path></svg>
+                    <span class="font-bold">Arena</span>
+                </button>
+                 <button id="market-button" class="location-button absolute" style="top: 65%; left: 55%;">
+                     <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mb-2 mx-auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0-4.4-3.6-8-8-8s-8 3.6-8 8 3.6 8 8 8 8-3.6 8-8z"></path><path d="M15 10c0 1.7-1.3 3-3 3s-3-1.3-3-3 1.3-3 3-3 3 1.3 3 3z"></path><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="M22 12h-2"></path><path d="M4 12H2"></path></svg>
+                    <span class="font-bold">Market</span>
+                </button>
+            </div>
+            <!-- Home Screen -->
+            <div id="home-screen" class="game-sub-screen hidden w-full h-full">
+                <h1 class="text-4xl font-bold mb-8">Ev</h1>
+                <div class="text-center space-y-4">
+                    <button class="btn-primary p-4 rounded-lg">Yatak: Can ve Enerji yeniler.</button>
+                    <button id="open-chest-button" class="btn-primary p-4 rounded-lg">Sandık: Eşyalarını depola.</button>
+                    <button class="btn-primary p-4 rounded-lg">Dolap: Görünümünü değiştir.</button>
+                </div>
+                <button class="nav-arrow back-to-village-button" style="top: 5%; left: 50%; transform: translateX(-50%);" title="Köy'e Geri Dön">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
+                </button>
+                <button class="nav-arrow" id="go-to-garden" style="left: 5%; top: 50%; transform: translateY(-50%);">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                </button>
+                <button class="nav-arrow" id="go-to-garage" style="right: 5%; top: 50%; transform: translateY(-50%);">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                </button>
+                <button class="nav-arrow" id="go-to-basement" style="bottom: 15%; left: 50%; transform: translateX(-50%);">
+                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+            </div>
+            <!-- Other Game Sub-screens -->
+            <div id="garage-screen" class="game-sub-screen hidden w-full h-full">
+                <h1 class="text-4xl font-bold">Garaj</h1>
+                <p>Mevcut Araç: El Arabası</p>
+                <button class="nav-arrow back-to-home-button" style="left: 5%; top: 50%; transform: translateY(-50%);" title="Eve Geri Dön">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                </button>
+            </div>
+            <div id="garden-screen" class="game-sub-screen hidden w-full h-full">
+                <h1 class="text-4xl font-bold">Bahçe</h1>
+                <div class="flex gap-4 mt-4">
+                    <p>Boks Torbası</p> <p>Yoga Matı</p> <p>Atlama İpi</p> <p>Zeka Küpü</p>
+                </div>
+                <button class="nav-arrow back-to-home-button" style="right: 5%; top: 50%; transform: translateY(-50%);" title="Eve Geri Dön">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                </button>
+            </div>
+             <div id="basement-screen" class="game-sub-screen hidden w-full h-full p-8">
+                <button class="nav-arrow back-to-home-button" style="top: 5%; left: 50%; transform: translateX(-50%);" title="Eve Geri Dön">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
+                </button>
+                <h1 class="text-4xl font-bold absolute" style="top: 18%;">Mahzen</h1>
+
+                 <div class="text-center">
+                     <p class="text-xl text-gray-300 mb-2">Üretim Durumu</p>
+                     <p class="text-3xl font-bold text-yellow-400">Boşta</p>
+                     <button class="btn-primary py-3 px-6 rounded-lg mt-8 text-lg">Üretime Başla</button>
+                 </div>
+                 <!-- Hammer Icon Button -->
+                 <button id="open-basement-menu" class="absolute top-8 right-8 nav-arrow w-16 h-16">
+                     <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
+                 </button>
+            </div>
+            <div id="arena-screen" class="game-sub-screen hidden w-full h-full relative">
+                <div id="arena-main-view" class="flex flex-col items-center justify-center w-full h-full">
+                     <button class="nav-arrow back-to-village-button" style="top: 5%; left: 50%; transform: translateX(-50%);" title="Köy'e Geri Dön">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
+                    </button>
+                    <h1 class="text-4xl font-bold mb-8">Arena</h1>
+                    <div class="flex gap-8">
+                        <button id="show-leagues-button" class="btn-primary p-8 rounded-lg">Ligler</button>
+                        <button id="show-dungeons-button" class="btn-primary p-8 rounded-lg">Zindanlar</button>
+                    </div>
+                </div>
+                 <div id="leagues-screen" class="hidden text-center">
+                    <button class="nav-arrow back-to-arena-button" style="position: absolute; top: 5%; left: 50%; transform: translateX(-50%);" title="Arenaya Geri Dön">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
+                    </button>
+                    <h2 class="text-3xl">Ligler</h2><p>Yakında...</p>
+                </div>
+                 <div id="dungeons-screen" class="hidden text-center">
+                    <button class="nav-arrow back-to-arena-button" style="position: absolute; top: 5%; left: 50%; transform: translateX(-50%);" title="Arenaya Geri Dön">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
+                    </button>
+                    <h2 class="text-3xl">Zindanlar</h2><p>Yakında...</p>
+                </div>
+            </div>
+            <div id="market-screen" class="game-sub-screen hidden w-full h-full relative">
+                 <div id="market-main-view" class="flex flex-col items-center justify-center w-full h-full">
+                     <button class="nav-arrow back-to-village-button" style="top: 5%; left: 50%; transform: translateX(-50%);" title="Köy'e Geri Dön">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
+                    </button>
+                    <h1 class="text-4xl font-bold mb-8">Market</h1>
+                    <div class="flex gap-8">
+                        <button id="show-market-buy-button" class="btn-primary p-8 rounded-lg">Satın Al</button>
+                        <button id="show-market-sell-button" class="btn-primary p-8 rounded-lg">Sat</button>
+                        <button id="show-market-trade-button" class="btn-primary p-8 rounded-lg">Alış/Satış</button>
+                    </div>
+                </div>
+                 <div id="market-buy-screen" class="hidden text-center">
+                    <button class="nav-arrow back-to-market-button" style="position: absolute; top: 5%; left: 50%; transform: translateX(-50%);" title="Markete Geri Dön">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
+                    </button>
+                    <h2 class="text-3xl">Satın Al</h2><p>Yakında...</p>
+                </div>
+                <div id="market-sell-screen" class="hidden w-full max-w-4xl p-4">
+                     <button class="nav-arrow back-to-market-button" style="position: absolute; top: 20px; left: 50%; transform: translateX(-50%);" title="Markete Geri Dön">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
+                    </button>
+                    <h2 class="text-3xl text-center mb-4 mt-16">İçki Borsası</h2>
+                    <div class="w-full h-64 bg-gray-900/50 p-2 rounded-lg border border-gray-700 mb-4">
+                        <canvas id="price-chart"></canvas>
+                    </div>
+                    <div class="space-y-2 text-lg">
+                        <div class="flex justify-between items-center bg-gray-800/60 p-2 rounded-md">
+                            <span>Elma Şarabı (x10)</span>
+                            <div class="flex items-center gap-4">
+                                <span id="apple-wine-price" class="font-bold text-yellow-400">120 💰</span>
+                                <button class="btn-primary px-4 py-1 rounded">Sat</button>
+                            </div>
+                        </div>
+                         <div class="flex justify-between items-center bg-gray-800/60 p-2 rounded-md">
+                            <span>Üzüm Şarabı (x5)</span>
+                            <div class="flex items-center gap-4">
+                                <span id="grape-wine-price" class="font-bold text-yellow-400">250 💰</span>
+                                <button class="btn-primary px-4 py-1 rounded">Sat</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- MARKET TRADE SCREEN - START -->
+                <div id="market-trade-screen" class="hidden w-full h-full max-w-6xl p-4 flex flex-col">
+                    <button class="nav-arrow back-to-market-button" style="position: absolute; top: 20px; left: 50%; transform: translateX(-50%);" title="Markete Geri Dön">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
+                    </button>
+                    <h2 class="text-3xl text-center font-bold mb-4 mt-16">Tüccar</h2>
+                    <div id="market-category-tabs" class="flex justify-center gap-2 mb-4 p-1 bg-gray-900/50 rounded-lg border border-gray-700">
+                        <!-- Category buttons will be generated here -->
+                    </div>
+                    <div id="market-subcategory-tabs" class="hidden flex-wrap justify-center gap-2 mb-4 p-1 bg-gray-800/30 rounded-lg">
+                        </div>
+                    <div id="market-item-list" class="flex-grow overflow-y-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4 bg-gray-900/50 rounded-lg border border-gray-700">
+                        <!-- Item listings will be generated here -->
+                    </div>
+                </div>
+                <!-- MARKET TRADE SCREEN - END -->
+                <div id="market-quick-sell-screen" class="hidden w-full h-full max-w-6xl p-4 flex flex-col">
+                    <button class="nav-arrow back-to-market-button" style="position: absolute; top: 20px; left: 50%; transform: translateX(-50%);" title="Markete Geri Dön">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
+                    </button>
+                    <h2 class="text-3xl text-center font-bold mb-4 mt-16">Hızlı Sat</h2>
+                    <div class="flex-grow flex gap-4">
+                        <div id="quick-sell-inventory-grid" class="w-2/3 grid grid-cols-8 gap-2 p-4 bg-gray-900/50 rounded-lg border border-gray-700 overflow-y-auto">
+                            </div>
+                        <div class="w-1/3 p-4 bg-gray-900/50 rounded-lg border border-gray-700 flex flex-col">
+                            <h3 class="text-xl font-bold mb-4">Satılacaklar</h3>
+                            <div class="flex-grow text-gray-300">
+                                <p>Satmak istediğin eşyalara tıkla.</p>
+                            </div>
+                            <div class="border-t border-gray-600 pt-4">
+                                <p class="text-lg">Toplam Değer:</p>
+                                <p id="quick-sell-total" class="text-3xl font-bold text-yellow-400 mb-4">0 💰</p>
+                                <button id="quick-sell-confirm-button" class="btn-primary w-full text-white font-bold py-3 rounded-lg" disabled>Satışı Onayla</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+
+            <!-- Basement Menu Screens -->
+            <div id="basement-menu-screen" class="game-sub-screen hidden w-full h-full p-8 bg-black/50">
+                 <div class="text-center flex flex-col sm:flex-row gap-8">
+                     <button id="show-developments-button" class="btn-primary text-2xl font-bold py-12 px-16 rounded-2xl">Geliştirmeler</button>
+                     <button id="show-employees-button" class="btn-primary text-2xl font-bold py-12 px-16 rounded-2xl">Elemanlar</button>
+                 </div>
+                 <button id="close-basement-menu" class="absolute top-4 right-4 text-gray-400 text-5xl leading-none hover:text-white transition">&times;</button>
+            </div>
+            <div id="developments-screen" class="game-sub-screen hidden w-full h-full p-8">
+                <h2 class="text-3xl font-bold mb-6">Geliştirmeler</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-5xl">
+                    <div class="upgrade-card rounded-lg p-4 flex flex-col">
+                        <h3 class="text-xl font-bold text-blue-400">Bakır Damıtıcı (Seviye 1)</h3>
+                        <p class="text-gray-300 my-2 flex-grow">İçkilerin saflığını artırır ve üretim süresini %10 kısaltır.</p>
+                        <button class="btn-primary w-full mt-auto py-2 rounded-lg">Geliştir: 1000 💰</button>
+                    </div>
+                    <div class="upgrade-card rounded-lg p-4 flex flex-col">
+                        <h3 class="text-xl font-bold text-blue-400">Meşe Fıçılar (Seviye 0)</h3>
+                        <p class="text-gray-300 my-2 flex-grow">Nadir içkiler üretme şansı verir ve içki kalitesini artırır.</p>
+                        <button class="btn-primary w-full mt-auto py-2 rounded-lg">Satın Al: 2500 💰</button>
+                    </div>
+                     <div class="upgrade-card rounded-lg p-4 flex flex-col">
+                        <h3 class="text-xl font-bold text-blue-400">Genişletilmiş Depo (Seviye 0)</h3>
+                        <p class="text-gray-300 my-2 flex-grow">Aynı anda daha fazla içki depolamanı sağlar.</p>
+                        <button class="btn-primary w-full mt-auto py-2 rounded-lg">Satın Al: 1500 💰</button>
+                    </div>
+                </div>
+                <button class="back-to-basement-menu btn-primary py-2 px-4 rounded-lg mt-8">Geri</button>
+            </div>
+            <div id="employees-screen" class="game-sub-screen hidden w-full h-full p-8">
+                 <h2 class="text-3xl font-bold mb-6">Elemanlar</h2>
+                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-5xl">
+                    <div class="upgrade-card rounded-lg p-4 flex flex-col text-center">
+                        <span class="text-5xl">👨‍🌾</span>
+                        <h3 class="text-xl font-bold text-green-400 mt-2">Çırak</h3>
+                        <p class="text-gray-300 my-2 flex-grow">Üretimden pasif olarak gelir sağlar.</p>
+                        <p class="font-semibold text-lg">+10 💰 / saat</p>
+                        <button class="btn-primary w-full mt-auto py-2 rounded-lg">İşe Al</button>
+                    </div>
+                    <div class="upgrade-card rounded-lg p-4 flex flex-col text-center">
+                        <span class="text-5xl">🧪</span>
+                        <h3 class="text-xl font-bold text-green-400 mt-2">Simyacı</h3>
+                        <p class="text-gray-300 my-2 flex-grow">Nadir içki üretme şansını artırır.</p>
+                        <p class="font-semibold text-lg">Maaş: 100 💰 / saat</p>
+                        <button class="btn-primary w-full mt-auto py-2 rounded-lg" disabled>Gerekli Geliştirme: Meşe Fıçılar</button>
+                    </div>
+                 </div>
+                <button class="back-to-basement-menu btn-primary py-2 px-4 rounded-lg mt-8">Geri</button>
+            </div>
+
+            <!-- Game UI Overlay -->
+            <div id="game-ui-overlay" class="absolute inset-0 pointer-events-none">
+                <button id="player-profile-button" class="absolute top-4 left-4 w-[15%] max-w-[180px] aspect-square p-2 form-container rounded-xl shadow-lg cursor-pointer hover:border-blue-500 transition pointer-events-auto">
+                     <svg id="profile-character-preview" viewBox="0 0 200 300" class="w-full h-full"></svg>
+                </button>
+                <div class="absolute bottom-24 left-1/2 -translate-x-1/2 pointer-events-auto" id="energy-bar-container">
+                    <div id="energy-bar-fill" style="width: 100%;"><span id="energy-bar-text">⚡ 100/100</span></div>
+                </div>
+                <div id="hotbar-inventory" class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 p-2 form-container rounded-xl pointer-events-auto">
+                    <div class="inventory-slot w-16 h-16 rounded-lg"></div> <div class="inventory-slot w-16 h-16 rounded-lg"></div> <div class="inventory-slot w-16 h-16 rounded-lg"></div> <div class="inventory-slot w-16 h-16 rounded-lg"></div> <div class="inventory-slot w-16 h-16 rounded-lg"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- GLOBAL UI & MODALS -->
+    <div id="global-ui" class="hidden">
+        <div class="absolute top-4 right-4 form-container rounded-lg p-2 flex items-center space-x-4">
+            <div class="flex items-center space-x-2 has-tooltip relative">
+                <span class="text-yellow-400">💰</span>
+                <span id="gold-display" class="font-bold">0</span>
+                <div id="gold-tooltip" class="tooltip absolute top-full mt-2 -right-2 bg-gray-800 text-white text-xs rounded py-1 px-2 shadow-lg">0</div>
+            </div>
+            <div class="flex items-center space-x-2 has-tooltip relative">
+                <span class="text-blue-400">💎</span>
+                <span id="diamond-display" class="font-bold">0</span>
+                <div id="diamond-tooltip" class="tooltip absolute top-full mt-2 -right-2 bg-gray-800 text-white text-xs rounded py-1 px-2 shadow-lg">0</div>
+            </div>
+        </div>
+        <button id="global-settings-button" class="absolute bottom-4 right-4 text-white hover:text-blue-400 transition">
+            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 0 2.15l-.15.08a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l-.22-.38a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1 0-2.15l.15-.08a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+    </div>
+    <div id="settings-modal" class="hidden absolute inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div class="form-container rounded-2xl p-8 shadow-2xl w-full max-w-md">
+           <h2 class="text-3xl font-bold text-center mb-8">Ayarlar</h2>
+           <div class="space-y-6">
+               <div class="flex items-center justify-between"><label for="volume-slider" class="font-semibold text-lg">Ses Seviyesi</label><input id="volume-slider" type="range" min="0" max="100" value="80" class="w-1/2"></div>
+                <div class="space-y-2">
+                    <label for="gift-code-input" class="font-semibold text-lg">Hediye Kodu</label>
+                    <div class="flex gap-2">
+                        <input id="gift-code-input" type="text" placeholder="Kodu buraya girin..." class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <button id="redeem-code-button" class="btn-primary px-4 rounded-lg">Kullan</button>
+                    </div>
+                    <p id="gift-code-message" class="text-sm h-4"></p>
+                </div>
+               <button id="reset-character-button" class="w-full bg-yellow-600 hover:bg-yellow-500 transition font-bold py-3 rounded-lg">Karakteri Sıfırla (100💎)</button>
+               <button id="logout-button" class="w-full bg-red-600 hover:bg-red-500 transition font-bold py-3 rounded-lg">Oturumu Kapat</button>
+           </div>
+           <button id="close-settings-modal" class="bg-gray-700 hover:bg-gray-600 transition w-full text-white font-bold py-3 rounded-lg mt-10">Kapat</button>
+        </div>
+    </div>
+    <div id="character-sheet-modal" class="hidden absolute inset-0 bg-black/60 flex items-center justify-center p-4 character-sheet-modal modal-closed z-40">
+        <div class="character-sheet-window w-full max-w-4xl form-container rounded-2xl shadow-2xl relative p-6">
+            <button id="close-character-sheet-button" class="absolute top-4 right-4 text-gray-400 text-3xl leading-none hover:text-white transition">&times;</button>
+            <div class="flex gap-6">
+                <div class="w-1/3 flex flex-col items-center gap-4">
+    <div class="w-full text-center">
+        <h2 id="sheet-player-name" class="text-2xl font-bold">Oyuncu Adı</h2>
+        <p id="sheet-player-level" class="text-blue-400">Seviye 1</p>
+    </div>
+
+    <div id="equipment-paper-doll" class="w-full grid grid-cols-3 grid-rows-5 gap-2">
+        <div id="equip-slot-helmet" data-slot-type="Kask" class="inventory-slot equipment-slot"></div>
+        <div id="equip-slot-necklace" data-slot-type="Kolye" class="inventory-slot equipment-slot"></div>
+        <div id="equip-slot-earring" data-slot-type="Küpe" class="inventory-slot equipment-slot"></div>
+
+        <div id="equip-slot-weapon" data-slot-type="Silah" class="inventory-slot equipment-slot row-span-2"></div>
+        <div class="w-full h-full row-span-3 bg-gray-900/50 rounded-xl border border-gray-700">
+            <svg id="sheet-character-preview" viewBox="0 0 200 300" class="w-full h-full"></svg>
+        </div>
+        <div id="equip-slot-chest" data-slot-type="Göğüslük" class="inventory-slot equipment-slot"></div>
+        
+        <div></div> <div id="equip-slot-gloves" data-slot-type="Eldiven" class="inventory-slot equipment-slot"></div>
+
+        <div id="equip-slot-belt" data-slot-type="Kemer" class="inventory-slot equipment-slot"></div>
+        <div></div> <div id="equip-slot-bracelet" data-slot-type="Bilezik" class="inventory-slot equipment-slot"></div>
+
+        <div id="equip-slot-pants" data-slot-type="Pantolon" class="inventory-slot equipment-slot"></div>
+        <div id="equip-slot-boots" data-slot-type="Ayakkabı" class="inventory-slot equipment-slot"></div>
+        <div></div> </div>
+
+    <div id="derived-stats-display" class="w-full p-3 bg-gray-900/50 rounded-lg space-y-2 text-sm"></div>
+</div>
+                <div class="w-2/3">
+                    <div class="space-y-3 mb-6">
+                         <div class="flex items-center gap-2">
+                            <span class="font-semibold text-lg">EXP</span>
+                            <div class="w-full bg-gray-900/50 rounded-full h-5 border border-gray-700">
+                                <div id="sheet-exp-bar" class="exp-bar-fill h-full rounded-full text-xs flex items-center justify-center" style="width: 0%;">
+                                    <span id="sheet-exp-text">0 / 100</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <details id="stats-details-panel" class="mb-6">
+                        <summary class="text-xl font-bold border-b border-gray-700 pb-2 cursor-pointer">
+                            Nitelikler (<span id="sheet-stat-points">0</span> Puan)
+                        </summary>
+                        <div id="stats-container" class="space-y-3 pt-4"></div>
+                    </details>
+                    <div>
+                        <h3 class="text-xl font-bold mb-3 border-b border-gray-700 pb-2">Envanter</h3>
+                        <div id="character-inventory-grid" class="grid grid-cols-6 gap-2"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- CHEST MODAL START -->
+    <div id="chest-modal" class="hidden absolute inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+        <div id="chest-container" class="form-container rounded-2xl p-6 shadow-2xl relative w-full max-w-5xl flex flex-col sm:flex-row gap-6">
+            <!-- Close Button -->
+            <button id="close-chest-button" class="absolute top-4 right-4 text-gray-400 text-3xl leading-none hover:text-white transition">&times;</button>
+            
+            <!-- Player Inventory -->
+            <div class="w-full sm:w-1/2">
+                <h3 class="text-xl font-bold mb-3 text-center">Envanterin</h3>
+                <div id="chest-player-inventory" class="grid grid-cols-6 gap-2 bg-gray-900/50 p-2 rounded-lg border border-gray-700 h-[320px] sm:h-auto overflow-y-auto">
+                    <!-- 5x6 slots will be generated by JS -->
+                </div>
+            </div>
+
+            <!-- House Inventory -->
+            <div class="w-full sm:w-1/2">
+                <div class="flex justify-center items-center mb-3 gap-4">
+                    <h3 class="text-xl font-bold">Ev Deposu</h3>
+                    <div class="flex gap-1 p-1 bg-gray-900/50 rounded-lg border border-gray-700">
+                        <button id="chest-page-1" data-page="1" class="chest-page-btn px-3 py-1 rounded font-bold">1</button>
+                        <button id="chest-page-2" data-page="2" class="chest-page-btn px-3 py-1 rounded font-bold">2</button>
+                    </div>
+                </div>
+                <div id="chest-house-inventory" class="grid grid-cols-6 gap-2 bg-gray-900/50 p-2 rounded-lg border border-gray-700 h-[320px] sm:h-auto overflow-y-auto">
+                     <!-- 5x6 slots for the current page will be generated by JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- CHEST MODAL END -->
+
+    <div id="stat-tooltip" class="hidden absolute w-64 p-3 form-container rounded-lg shadow-xl text-sm z-50 opacity-0"></div>
+
+    <div id="item-tooltip" class="hidden absolute w-72 p-3 form-container rounded-lg shadow-xl text-sm z-[9999] opacity-0"></div>
+
+    <div id="quick-sell-confirmation-modal" class="hidden absolute inset-0 bg-black/70 flex items-center justify-center z-[100]">
+        <div class="form-container rounded-2xl p-8 shadow-2xl w-full max-w-md text-center">
+            <h2 class="text-2xl font-bold mb-4">Satışı Onayla</h2>
+            <p class="text-gray-300 mb-6">Seçili eşyaları <strong id="confirm-sell-price" class="text-yellow-400">0 💰</strong> karşılığında satmak istediğine emin misin? Bu işlem geri alınamaz.</p>
+            <div class="flex justify-center gap-4">
+                <button id="confirm-sell-yes-btn" class="bg-red-600 hover:bg-red-500 font-bold py-3 px-8 rounded-lg transition">Evet, Sat</button>
+                <button id="confirm-sell-no-btn" class="bg-gray-600 hover:bg-gray-500 font-bold py-3 px-8 rounded-lg transition">İptal</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc, onSnapshot, runTransaction, increment, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDvChKu2Fv7r1l0faDLof9Yhae4kodiDGo",
+            authDomain: "mustea-gangster.firebaseapp.com",
+            projectId: "mustea-gangster",
+            storageBucket: "mustea-gangster.appspot.com",
+            messagingSenderId: "546211784548",
+            appId: "1:546211784548:web:f4bab064b1941bc4067c71"
+        };
+
+        const RARITY_CONFIG = {
+            common: { name: 'Yaygın', color: '#9ca3af', priceMultiplier: 1 },
+            uncommon: { name: 'Sıradışı', color: '#22c55e', priceMultiplier: 1.5 },
+            rare: { name: 'Nadir', color: '#3b82f6', priceMultiplier: 2.5 },
+            epic: { name: 'Epik', color: '#a855f7', priceMultiplier: 5 },
+            legendary: { name: 'Efsanevi', color: '#f97316', priceMultiplier: 10 }
+        };
+
+        // GÜNCELLENMİŞ EŞYA LİSTESİ
+        const GAME_ITEMS = {
+            // Silahlar (Değişiklik yok)
+            'shadow_dagger': { name: "Gölge Hançer", category: 'Silah', rarity: 'uncommon', buyPrice: 150, sellPrice: 75, stats: { damage: 8, dodge: 2 }, icon: '<svg>...</svg>' },
+            'crimson_axe': { name: "Kızıl Balta", category: 'Silah', rarity: 'rare', buyPrice: 300, sellPrice: 150, stats: { damage: 15, hp: 20 }, icon: '<svg>...</svg>' },
+            'storm_bow': { name: "Fırtına Yayı", category: 'Silah', rarity: 'rare', buyPrice: 320, sellPrice: 160, stats: { damage: 12, speed: 5 }, icon: '<svg>...</svg>' },
+            'obsidian_sword': { name: "Obsidyen Kılıç", category: 'Silah', rarity: 'epic', buyPrice: 750, sellPrice: 375, stats: { damage: 25, damageReduction: 2 }, icon: '<svg>...</svg>' },
+            'mage_staff': { name: "Büyücü Asası", category: 'Silah', rarity: 'epic', buyPrice: 700, sellPrice: 350, stats: { damage: 20, mana: 50 }, icon: '<svg>...</svg>' },
+            
+            // Zırhlar (subCategory eklendi)
+            'runic_helmet': { name: "Rünlü Miğfer", category: 'Zırh', subCategory: 'Kask', rarity: 'epic', buyPrice: 600, sellPrice: 300, stats: { armor: 12, mana: 40 }, icon: '<svg>...</svg>' },
+            'iron_chestplate': { name: "Demir Göğüslük", category: 'Zırh', subCategory: 'Göğüslük', rarity: 'common', buyPrice: 100, sellPrice: 50, stats: { armor: 10, hp: 30 }, icon: '<svg>...</svg>' },
+            'dragon_scale_armor': { name: "Ejderha Pulu Zırhı", category: 'Zırh', subCategory: 'Göğüslük', rarity: 'legendary', buyPrice: 2000, sellPrice: 1000, stats: { armor: 35, hp: 100, damageReduction: 5 }, icon: '<svg>...</svg>' },
+            'elven_armor': { name: "Elf Zırhı", category: 'Zırh', subCategory: 'Göğüslük', rarity: 'rare', buyPrice: 550, sellPrice: 275, stats: { armor: 15, dodge: 5 }, icon: '<svg>...</svg>' },
+            'leather_pants': { name: "Deri Pantolon", category: 'Zırh', subCategory: 'Pantolon', rarity: 'common', buyPrice: 80, sellPrice: 40, stats: { armor: 5 }, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-yellow-700"><path d="M12 2v20"/><path d="M4 2v20"/><path d="M20 2v20"/><path d="M5 2h14a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z"/></svg>' },
+            'shadow_boots': { name: "Gölge Çizmeleri", category: 'Zırh', subCategory: 'Ayakkabı', rarity: 'uncommon', buyPrice: 280, sellPrice: 140, stats: { armor: 5, speed: 3 }, icon: '<svg>...</svg>' },
+            'gauntlets_of_strength': { name: "Güç Eldivenleri", category: 'Zırh', subCategory: 'Eldiven', rarity: 'rare', buyPrice: 320, sellPrice: 160, stats: { armor: 4, damage: 5 }, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-red-500"><path d="M17 11.5V9a2 2 0 0 0-2-2h- эмоциональный-5a2 2 0 0 0-2 2v2.5"/><path d="M17 11.5a2 2 0 0 1-2 2h-5a2 2 0 0 1-2-2"/><path d="M4 14v-2.5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2V14"/><path d="M8 18h8"/></svg>' },
+            
+            // Eklentiler (subCategory eklendi ve yeni örnekler eklendi)
+            'talisman_of_power': { name: "Güç Tılsımı", category: 'Eklenti', subCategory: 'Kolye', rarity: 'epic', buyPrice: 300, sellPrice: 150, stats: { flatDamage: 5, hp: 20 }, icon: '<svg>...</svg>' },
+            'bracelet_of_speed': { name: "Hız Bileziği", category: 'Eklenti', subCategory: 'Bilezik', rarity: 'rare', buyPrice: 280, sellPrice: 140, stats: { speed: 5 }, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-blue-400"><path d="M10 17a5 5 0 0 1-5-5 5 5 0 0 1 5-5h1a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-1z"/><path d="M7 17a2.5 2.5 0 0 1-2.5-2.5 2.5 2.5 0 0 1 2.5-2.5h1a2.5 2.5 0 0 1 2.5 2.5 2.5 2.5 0 0 1-2.5 2.5h-1z"/></svg>' },
+            'earring_of_wisdom': { name: "Bilgelik Küpesi", category: 'Eklenti', subCategory: 'Küpe', rarity: 'uncommon', buyPrice: 220, sellPrice: 110, stats: { mana: 30 }, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-purple-400"><path d="M12 12a3 3 0 0 1-3-3 3 3 0 0 1 3-3 3 3 0 0 1 3 3 3 3 0 0 1-3 3z"/><path d="M12 12v3a3 3 0 0 0 3 3h1a2 2 0 0 1 2 2v1h-8v-1a2 2 0 0 1 2-2h1a3 3 0 0 0 3-3z"/></svg>' },
+            'belt_of_fortitude': { name: "Metanet Kemeri", category: 'Eklenti', subCategory: 'Kemer', rarity: 'rare', buyPrice: 400, sellPrice: 200, stats: { damageReduction: 3 }, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-gray-400"><path d="M3 12h18M5 12V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v5"/><path d="M5 12v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/><path d="M12 7V2"/><path d="M12 17v5"/></svg>' },
+            'swift_horse': { name: "Atik At", category: 'Eklenti', subCategory: 'Binek', rarity: 'epic', buyPrice: 5000, sellPrice: 2500, stats: { travelTimeReduction: 15 }, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-yellow-600"><path d="M12 2a2 2 0 0 0-2 2v2h4V4a2 2 0 0 0-2-2z"/><path d="M4 14s1-1 4-1 5 2 8 2 4-1 4-1V6s-1 1-4 1-5-2-8-2-4 1-4 1z"/><path d="M4 6v8"/><path d="M20 6v8"/><path d="M8 18h8"/></svg>' },
+            'dragon_tattoo': { name: "Ejderha Dövmesi", category: 'Eklenti', subCategory: 'Dövme', rarity: 'legendary', buyPrice: 10000, sellPrice: 5000, stats: { damage: 10, hp: 50 }, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-red-600"><path d="M4 12c0-4.4 3.6-8 8-8s8 3.6 8 8-3.6 8-8 8-8-3.6-8-8z"/><path d="M12 2v20"/><path d="M12 12l6-6"/><path d="M12 12l-6 6"/><path d="M12 12l-6-6"/><path d="M12 12l6 6"/></svg>' },
+            'spirit_wolf': { name: "Ruh Kurt", category: 'Eklenti', subCategory: 'Evcil Hayvan', rarity: 'epic', buyPrice: 7500, sellPrice: 3750, stats: { dodge: 5, speed: 5 }, icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-cyan-300"><path d="M12 12c-2.2 0-4-1.8-4-4s1.8-4 4-4 4 1.8 4 4-1.8 4-4 4z"/><path d="M12 12v3a4 4 0 0 1-4 4H4v-3a4 4 0 0 1 4-4h4z"/><path d="M12 12v3a4 4 0 0 0 4 4h4v-3a4 4 0 0 0-4-4h-4z"/></svg>' },
+
+            // Canavar Parçaları (Değişiklik yok)
+            'goblin_ear': { name: "Goblin Kulağı", category: 'Canavar Parçası', rarity: 'common', buyPrice: 20, sellPrice: 10, icon: '<svg>...</svg>' }
+        };
+        let app, auth, db;
+        try {
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+            console.log("Firebase başarıyla başlatıldı.");
+        } catch (e) { console.error("Firebase başlatma hatası.", e); }
+
+        const STAT_CONFIG = {
+            base: { hp: 100, damage: 10, mana: 10, energy: 100, fame: 1000, dodgeChance: 5, damageReduction: 0, travelTimeReduction: 0, marketDiscount: 0 },
+            perPoint: {
+                guc: { damage: 3, hp: 5 },
+                zeka: { mana: 5, marketDiscount: 0.5 },
+                hiz: { damage: 1, dodgeChance: 1, travelTimeReduction: 0.5 },
+                tanklik: { hp: 20, damage: 1.2, damageReduction: 0.1, dodgeChance: -0.2 }
+            },
+            caps: { marketDiscount: 50, dodgeChance: 50, travelTimeReduction: 75, damageReduction: 40 }
+        };
+        const STAT_DESCRIPTIONS = {
+            guc: '<h3>💪 Güç</h3><p>Her puan +3 Hasar ve +5 Can verir. Fiziksel saldırıların temelini oluşturur.</p>',
+            zeka: '<h3>🔮 Zeka</h3><p>Her puan +5 Mana ve marketlerde %0.5 indirim (Maks %50) sağlar. Ayrıca şans faktörünü etkiler.</p>',
+            hiz: '<h3>🏹 Hız</h3><p>Her puan +1 Hasar, +%1 Kaçınma Şansı (Maks %50) ve seyahat sürelerinde %0.5 kısalma (Maks %75) sağlar.</p>',
+            tanklik: '<h3>🛡️ Tanklık</h3><p>Her puan +20 Can, +1.2 Hasar ve +%0.1 Hasar Azaltma (Maks %40) verir. Ancak Kaçınma Şansını %0.2 düşürür.</p>'
+        };
+        const eyeOrigins = [{ x: 90, y: 75 }, { x: 110, y: 75 }];
+        const maxMove = 2.5;
+
+        // Screen and UI element references
+        const authScreen = document.getElementById('auth-screen'), mainMenuScreen = document.getElementById('main-menu-screen'), characterCreationScreen = document.getElementById('character-creation-screen'), gameScreen = document.getElementById('game-screen');
+        const villageView = document.getElementById('village-view');
+        const homeScreen = document.getElementById('home-screen'), arenaScreen = document.getElementById('arena-screen'), marketScreen = document.getElementById('market-screen');
+        const garageScreen = document.getElementById('garage-screen'), gardenScreen = document.getElementById('garden-screen'), basementScreen = document.getElementById('basement-screen');
+        const homeButton = document.getElementById('home-button'), arenaButton = document.getElementById('arena-button'), marketButton = document.getElementById('market-button');
+        const goToGarageBtn = document.getElementById('go-to-garage'), goToGardenBtn = document.getElementById('go-to-garden'), goToBasementBtn = document.getElementById('go-to-basement');
+        const arenaMainView = document.getElementById('arena-main-view'), leaguesScreen = document.getElementById('leagues-screen'), dungeonsScreen = document.getElementById('dungeons-screen');
+        const showLeaguesButton = document.getElementById('show-leagues-button'), showDungeonsButton = document.getElementById('show-dungeons-button');
+        const marketMainView = document.getElementById('market-main-view'), marketBuyScreen = document.getElementById('market-buy-screen'), marketSellScreen = document.getElementById('market-sell-screen'), marketTradeScreen = document.getElementById('market-trade-screen');
+        const showMarketBuyButton = document.getElementById('show-market-buy-button'), showMarketSellButton = document.getElementById('show-market-sell-button'), showMarketTradeButton = document.getElementById('show-market-trade-button');
+        
+        // Basement and Market UI Elements
+        const openBasementMenuBtn = document.getElementById('open-basement-menu');
+        const basementMenuScreen = document.getElementById('basement-menu-screen');
+        const closeBasementMenuBtn = document.getElementById('close-basement-menu');
+        const showDevelopmentsBtn = document.getElementById('show-developments-button');
+        const showEmployeesBtn = document.getElementById('show-employees-button');
+        const developmentsScreen = document.getElementById('developments-screen');
+        const employeesScreen = document.getElementById('employees-screen');
+        const backToBasementMenuBtns = document.querySelectorAll('.back-to-basement-menu');
+        
+        const globalUi = document.getElementById('global-ui'), settingsModal = document.getElementById('settings-modal'), characterSheetModal = document.getElementById('character-sheet-modal');
+        const loginForm = document.getElementById('login-form'), registerForm = document.getElementById('register-form');
+        const authMessage = document.getElementById('auth-message');
+        const loginTabBtn = document.getElementById('login-tab-button'), registerTabBtn = document.getElementById('register-tab-button');
+        const googleSignInBtn = document.getElementById('google-signin-button');
+        const userDisplay = document.getElementById('user-display'), uidDisplay = document.getElementById('uid-display');
+        const startGameBtn = document.getElementById('start-game-button');
+        const globalSettingsBtn = document.getElementById('global-settings-button'), closeSettingsModalBtn = document.getElementById('close-settings-modal'), logoutBtn = document.getElementById('logout-button');
+        const redeemCodeButton = document.getElementById('redeem-code-button'), giftCodeMessage = document.getElementById('gift-code-message');
+        const characterCreationForm = document.getElementById('character-creation-form'), createCharacterBtn = document.getElementById('create-character-button');
+        const resetCharWarning = document.getElementById('reset-char-warning'), resetCharacterBtn = document.getElementById('reset-character-button');
+        const nameValidationMessage = document.getElementById('name-validation-message');
+        const playerProfileButton = document.getElementById('player-profile-button'), closeCharacterSheetButton = document.getElementById('close-character-sheet-button');
+        const statTooltip = document.getElementById('stat-tooltip');
+        // Chest UI elements
+        const chestModal = document.getElementById('chest-modal');
+        const openChestButton = document.getElementById('open-chest-button');
+        const closeChestButton = document.getElementById('close-chest-button');
+        const chestPlayerInventory = document.getElementById('chest-player-inventory');
+        const chestHouseInventory = document.getElementById('chest-house-inventory');
+        const chestPageButtons = document.querySelectorAll('.chest-page-btn');
+        
+        let currentUserData = null, unsubscribeUser;
+        let isResettingCharacter = false;
+        let statClickTracker = {};
+        let selectedGender = 'male', selectedSkinColor = '#e0ac69', selectedHairColor = '#5D4037';
+        let currentChestPage = 1;
+        let currentMarketCategory = 'Silah';
+        const skinColors = ['#F2D0B1', '#E0AC69', '#C68642', '#8D5524', '#614332'];
+        const hairColors = ['#2C222B', '#5D4037', '#A16E4B', '#B8860B', '#F8F8FF', '#D2691E'];
+
+        let currentMarketSubCategory = null;
+
+        // YENİ: Alt kategori konfigürasyonu
+        const SUB_CATEGORIES = {
+            'Zırh': ['Kask', 'Göğüslük', 'Pantolon', 'Ayakkabı', 'Eldiven'],
+            'Eklenti': ['Kolye', 'Bilezik', 'Küpe', 'Kemer', 'Binek', 'Dövme', 'Evcil Hayvan']
+        };
+
+        const SLOT_TYPE_TO_KEY_MAP = {
+            'Silah': 'weapon',
+            'Kask': 'helmet',
+            'Göğüslük': 'chest',
+            'Pantolon': 'pants',
+            'Ayakkabı': 'boots',
+            'Eldiven': 'gloves',
+            'Kolye': 'necklace',
+            'Bilezik': 'bracelet',
+            'Küpe': 'earring',
+            'Kemer': 'belt'
+        };
+        
+        let priceChart;
+        let priceUpdateInterval;
+
+        const itemTooltip = document.getElementById('item-tooltip');
+        let quickSellSelectedIndices = [];
+        let hideTooltipTimeout; // << EKLENECEK YENİ DEĞİŞKEN
+
+        // Hızlı Sat için yeni element referansları
+        const marketQuickSellScreen = document.getElementById('market-quick-sell-screen'); // Bunu birazdan HTML'e ekleyeceğiz
+        const quickSellInventoryGrid = document.getElementById('quick-sell-inventory-grid');
+        const quickSellTotal = document.getElementById('quick-sell-total');
+        const quickSellConfirmButton = document.getElementById('quick-sell-confirm-button');
+        const quickSellConfirmationModal = document.getElementById('quick-sell-confirmation-modal');
+        const confirmSellYesBtn = document.getElementById('confirm-sell-yes-btn');
+        const confirmSellNoBtn = document.getElementById('confirm-sell-no-btn');
+
+        function showScreen(screen) {
+            [authScreen, mainMenuScreen, gameScreen, characterCreationScreen].forEach(s => s.classList.add('hidden'));
+            screen.classList.remove('hidden');
+            globalUi.classList.toggle('hidden', screen === authScreen || screen === characterCreationScreen);
+            if (screen === gameScreen) {
+                showVillageView();
+            }
+        }
+        function showGameSubScreen(subScreen) {
+            const allSubScreens = [villageView, homeScreen, arenaScreen, marketScreen, garageScreen, gardenScreen, basementScreen, basementMenuScreen, developmentsScreen, employeesScreen];
+            allSubScreens.forEach(s => s.classList.add('hidden'));
+            subScreen.classList.remove('hidden');
+        }
+        function showVillageView() {
+             const allSubScreens = [homeScreen, arenaScreen, marketScreen, garageScreen, gardenScreen, basementScreen, basementMenuScreen, developmentsScreen, employeesScreen];
+            allSubScreens.forEach(s => s.classList.add('hidden'));
+            villageView.classList.remove('hidden');
+        }
+        function updateCharacterPreview(svgContainerId, characterData) {
+            const masterSvg = document.getElementById('character-preview').innerHTML;
+            const targetSvg = document.getElementById(svgContainerId);
+            if (!targetSvg || !characterData) return;
+            targetSvg.innerHTML = masterSvg;
+            const { gender, skinColor, hairColor } = characterData;
+            targetSvg.querySelectorAll('.character-skin-part').forEach(part => part.style.fill = skinColor);
+            const isMale = gender === 'male';
+            ['hair-male', 'hair-female-front', 'hair-female-back'].forEach(id => {
+                const el = targetSvg.querySelector(`#${id}`);
+                if (el) el.style.fill = hairColor;
+            });
+            ['body-male', 'hair-male-front-group'].forEach(id => {
+                const el = targetSvg.querySelector(`#${id}`);
+                if (el) el.classList.toggle('hidden', !isMale);
+            });
+            ['body-female', 'hair-female-front-group', 'hair-female-back-group'].forEach(id => {
+                const el = targetSvg.querySelector(`#${id}`);
+                if (el) el.classList.toggle('hidden', isMale);
+            });
+        }
+        
+        function updateCharacterSheetUI() {
+            if (!currentUserData) return;
+
+            // 1. STAT HESAPLAMALARI VE TEMEL BİLGİLER (Bu kısım sizde doğruydu)
+            document.getElementById('gold-display').textContent = Math.floor(currentUserData.gold) || 0;
+            document.getElementById('diamond-display').textContent = currentUserData.diamonds || 0;
+            
+            const energy = currentUserData.energy ?? 100;
+            const maxEnergy = currentUserData.maxEnergy ?? 100;
+            const energyPercent = (energy / maxEnergy) * 100;
+            document.getElementById('energy-bar-fill').style.width = `${energyPercent}%`;
+            document.getElementById('energy-bar-text').textContent = `⚡ ${energy}/${maxEnergy}`;
+
+            const stats = currentUserData.stats || { guc: 1, zeka: 1, hiz: 1, tanklik: 1 };
+            const baseStats = STAT_CONFIG.base;
+            let calculated = { ...baseStats };
+            calculated.hp = baseStats.hp + (stats.guc * STAT_CONFIG.perPoint.guc.hp) + (stats.tanklik * STAT_CONFIG.perPoint.tanklik.hp);
+            calculated.damage = baseStats.damage + (stats.guc * STAT_CONFIG.perPoint.guc.damage) + (stats.hiz * STAT_CONFIG.perPoint.hiz.damage) + (stats.tanklik * STAT_CONFIG.perPoint.tanklik.damage);
+            calculated.mana = baseStats.mana + (stats.zeka * STAT_CONFIG.perPoint.zeka.mana);
+            calculated.marketDiscount = Math.min(stats.zeka * STAT_CONFIG.perPoint.zeka.marketDiscount, STAT_CONFIG.caps.marketDiscount);
+            calculated.damageReduction = Math.min(stats.tanklik * STAT_CONFIG.perPoint.tanklik.damageReduction, STAT_CONFIG.caps.damageReduction);
+            let dodgeFromSpeed = stats.hiz * STAT_CONFIG.perPoint.hiz.dodgeChance;
+            let dodgePenaltyFromTank = stats.tanklik * STAT_CONFIG.perPoint.tanklik.dodgeChance;
+            calculated.dodgeChance = Math.max(0, Math.min(baseStats.dodgeChance + dodgeFromSpeed + dodgePenaltyFromTank, STAT_CONFIG.caps.dodgeChance));
+            calculated.travelTimeReduction = Math.min(stats.hiz * STAT_CONFIG.perPoint.hiz.travelTimeReduction, STAT_CONFIG.caps.travelTimeReduction);
+            
+            if (currentUserData.character) {
+                updateCharacterPreview('profile-character-preview', currentUserData.character);
+                updateCharacterPreview('sheet-character-preview', currentUserData.character);
+            }
+            document.getElementById('sheet-player-name').textContent = currentUserData.inGameName || 'Oyuncu';
+            document.getElementById('sheet-player-level').textContent = `Seviye ${currentUserData.level || 1}`;
+            const expPercentage = ((currentUserData.exp || 0) / (currentUserData.maxExp || 100)) * 100;
+            document.getElementById('sheet-exp-bar').style.width = `${expPercentage}%`;
+            document.getElementById('sheet-exp-text').textContent = `${currentUserData.exp || 0} / ${currentUserData.maxExp || 100}`;
+            
+            document.getElementById('derived-stats-display').innerHTML = `
+                <div>❤️ Can: <span class="font-bold text-green-400">${calculated.hp.toFixed(0)}</span></div>
+                <div>⚔️ Hasar: <span class="font-bold text-red-400">${calculated.damage.toFixed(1)}</span></div>
+                <div>💧 Mana: <span class="font-bold text-blue-400">${calculated.mana.toFixed(0)}</span></div>
+                <div>🛡️ Hasar Azaltma: <span class="font-bold text-gray-300">${calculated.damageReduction.toFixed(1)}%</span></div>
+                <div>🍃 Kaçınma Şansı: <span class="font-bold text-teal-300">${calculated.dodgeChance.toFixed(1)}%</span></div>
+                <div>💰 Market İndirimi: <span class="font-bold text-yellow-400">${calculated.marketDiscount.toFixed(1)}%</span></div>
+                <div>⏱️ Seyahat Hızı: <span class="font-bold text-purple-400">${calculated.travelTimeReduction.toFixed(1)}%</span></div>
+            `;
+            const statPoints = currentUserData.statPoints || 0;
+            document.getElementById('sheet-stat-points').textContent = statPoints;
+            const statsContainer = document.getElementById('stats-container');
+            statsContainer.innerHTML = '';
+            const statNames = { guc: '💪 Güç', zeka: '🔮 Zeka', hiz: '🏹 Hız', tanklik: '🛡️ Tanklık' };
+            for (const [stat, value] of Object.entries(stats)) {
+                statsContainer.innerHTML += `
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <button class="stat-info-btn" data-stat="${stat}">?</button>
+                            <span class="font-semibold">${statNames[stat]}:</span>
+                            <span class="text-lg text-white">${value}</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button class="stat-plus-btn" data-stat="${stat}" ${statPoints === 0 ? 'disabled' : ''}>+</button>
+                            <button class="stat-plus-btn hidden" data-stat="${stat}" data-amount="10" ${statPoints < 10 ? 'disabled' : ''}>+10</button>
+                        </div>
+                    </div>`;
+            }
+
+            // 2. ENVANTER VE EKİPMAN GÖSTERİMİ (YENİ VE BİRLEŞTİRİLMİŞ KISIM)
+            const inventoryGrid = document.getElementById('character-inventory-grid');
+            inventoryGrid.innerHTML = '';
+            const playerInventory = currentUserData.inventory || [];
+            playerInventory.forEach((item, index) => {
+                if (item && GAME_ITEMS[item.id]) {
+                    const itemData = GAME_ITEMS[item.id];
+                    const slot = document.createElement('div');
+                    slot.className = 'inventory-slot rounded-lg';
+                    slot.innerHTML = itemData.icon;
+                    slot.draggable = true;
+                    slot.dataset.itemType = 'inventory';
+                    slot.dataset.inventoryIndex = index;
+                    slot.dataset.itemId = item.id;
+                    
+                    slot.addEventListener('mouseenter', () => showItemTooltip(item.id, slot));
+                    slot.addEventListener('mouseleave', hideItemTooltip);
+                    inventoryGrid.appendChild(slot);
+                }
+            });
+            for (let i = playerInventory.length; i < 30; i++) {
+                const emptySlot = document.createElement('div');
+                emptySlot.className = 'inventory-slot rounded-lg';
+                inventoryGrid.appendChild(emptySlot);
+            }
+
+            const equipment = currentUserData.equipment || {};
+            for (const slotKey of Object.values(SLOT_TYPE_TO_KEY_MAP)) {
+                 const slotId = `equip-slot-${slotKey}`;
+                 const slotElement = document.getElementById(slotId);
+                 if (!slotElement) continue;
+
+                 const item = equipment[slotKey];
+                 slotElement.innerHTML = ''; 
+                 if (item && GAME_ITEMS[item.id]) {
+                    slotElement.innerHTML = GAME_ITEMS[item.id].icon;
+                    slotElement.draggable = true;
+                    slotElement.dataset.itemType = 'equipment';
+                    slotElement.dataset.slotKey = slotKey;
+                    slotElement.dataset.itemId = item.id;
+
+                    slotElement.addEventListener('mouseenter', () => showItemTooltip(item.id, slotElement));
+                    slotElement.addEventListener('mouseleave', hideItemTooltip);
+                 } else {
+                    slotElement.draggable = false;
+                    slotElement.removeAttribute('data-item-type');
+                    slotElement.removeAttribute('data-slot-key');
+                    slotElement.removeAttribute('data-item-id');
+                 }
+            }
+        }
+
+        // MARKET TRADE EKRANINI OLUŞTURMA (YENİ)
+        function renderMarketTradeScreen() {
+            const mainCategories = [...new Set(Object.values(GAME_ITEMS).map(item => item.category))];
+            mainCategories.push('Hızlı Sat');
+            const mainTabsContainer = document.getElementById('market-category-tabs');
+            const subTabsContainer = document.getElementById('market-subcategory-tabs');
+            mainTabsContainer.innerHTML = '';
+
+            // 1. Ana Kategori Sekmelerini Oluştur
+            mainCategories.forEach(category => {
+                const button = document.createElement('button');
+                button.textContent = category;
+                button.className = 'market-category-btn px-4 py-2 rounded-md font-semibold text-gray-300';
+                if (category === currentMarketCategory) {
+                    button.classList.add('active');
+                }
+                
+                // 2. Ana Kategoriye Tıklama Olayı
+                button.addEventListener('click', () => {
+                    currentMarketCategory = category;
+                    // Tüm sekmelerdeki 'active' durumunu temizle ve sadece tıklanana ekle
+                    mainTabsContainer.querySelectorAll('.market-category-btn').forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+
+                    marketQuickSellScreen.classList.add('hidden');
+                    document.getElementById('market-item-list').classList.remove('hidden');
+
+                    if (category === 'Hızlı Sat') {
+                        subTabsContainer.classList.add('hidden');
+                        document.getElementById('market-item-list').classList.add('hidden');
+                        marketQuickSellScreen.classList.remove('hidden');
+                        renderQuickSellScreen();
+                        return; // Hızlı Sat için işlemi burada bitir
+                    }
+
+                    // 3. Alt Kategorileri Kontrol Et ve Oluştur
+                    if (SUB_CATEGORIES[category]) {
+                        subTabsContainer.innerHTML = '';
+                        subTabsContainer.classList.remove('hidden');
+                        currentMarketSubCategory = SUB_CATEGORIES[category][0]; // Varsayılan olarak ilk alt kategoriyi seç
+
+                        SUB_CATEGORIES[category].forEach(subCategory => {
+                            const subButton = document.createElement('button');
+                            subButton.textContent = subCategory;
+                            subButton.className = 'market-category-btn px-3 py-1 rounded-md text-sm font-semibold text-gray-400';
+                            if (subCategory === currentMarketSubCategory) {
+                                subButton.classList.add('active');
+                            }
+                            
+                            // Alt kategoriye tıklama olayı
+                            subButton.addEventListener('click', () => {
+                                currentMarketSubCategory = subCategory;
+                                subTabsContainer.querySelectorAll('.market-category-btn').forEach(btn => btn.classList.remove('active'));
+                                subButton.classList.add('active');
+                                renderMarketItems();
+                            });
+                            subTabsContainer.appendChild(subButton);
+                        });
+                    } else {
+                        // Alt kategorisi olmayanlar için alanı gizle
+                        subTabsContainer.classList.add('hidden');
+                        currentMarketSubCategory = null;
+                    }
+                    
+                    renderMarketItems();
+                });
+                mainTabsContainer.appendChild(button);
+            });
+            
+            // Başlangıçta doğru alt kategorileri göstermek için
+            if (SUB_CATEGORIES[currentMarketCategory]) {
+                mainTabsContainer.querySelector('.active').dispatchEvent(new Event('click'));
+            } else {
+                 renderMarketItems();
+            }
+        }
+
+        // MARKET EŞYALARINI LİSTELEME (YENİ)
+        function renderMarketItems() {
+             if (!currentUserData) return;
+            const itemListContainer = document.getElementById('market-item-list');
+            itemListContainer.innerHTML = '';
+            const playerInventoryCounts = currentUserData.inventory.reduce((acc, item) => {
+                acc[item.id] = (acc[item.id] || 0) + 1;
+                return acc;
+            }, {});
+
+            for (const [id, item] of Object.entries(GAME_ITEMS)) {
+                // YENİ FİLTRELEME MANTIĞI
+                const categoryMatch = item.category === currentMarketCategory;
+                let subCategoryMatch = true; // Varsayılan olarak doğru kabul et
+                
+                // Eğer bir alt kategori seçiliyse, eşyanın da o alt kategoride olmasını kontrol et
+                if (currentMarketSubCategory) {
+                    subCategoryMatch = item.subCategory === currentMarketSubCategory;
+                }
+
+                if (categoryMatch && subCategoryMatch) {
+                    const rarity = RARITY_CONFIG[item.rarity] || RARITY_CONFIG.common;
+                    const hasItem = (playerInventoryCounts[id] || 0) > 0;
+                    const itemElement = document.createElement('div');
+                    itemElement.className = 'market-item rounded-lg p-4 flex items-center justify-between gap-4';
+                    
+                    itemElement.innerHTML = `
+                        <div class="rarity-border" style="background: ${rarity.color}; opacity: 0.4;"></div>
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 flex-shrink-0 bg-gray-900/50 rounded-md flex items-center justify-center">${item.icon}</div>
+                            <div>
+                                <h4 class="font-bold" style="color: ${rarity.color};">${item.name}</h4>
+                                <p class="text-xs text-gray-400">Envanterde: ${playerInventoryCounts[id] || 0}</p>
+                            </div>
+                        </div>
+                        <div class="flex flex-col items-end gap-2">
+                            <button data-item-id="${id}" class="buy-item-btn bg-green-600 hover:bg-green-500 text-white font-bold py-1 px-3 rounded-md text-sm transition w-24">Al: ${item.buyPrice}💰</button>
+                            <button data-item-id="${id}" class="sell-item-btn bg-red-600 hover:bg-red-500 text-white font-bold py-1 px-3 rounded-md text-sm transition w-24" ${!hasItem ? 'disabled' : ''}>Sat: ${item.sellPrice}💰</button>
+                        </div>
+                    `;
+                    itemElement.addEventListener('mouseenter', () => showItemTooltip(id, itemElement));
+                    itemElement.addEventListener('mouseleave', hideItemTooltip);
+                    itemListContainer.appendChild(itemElement);
+                }
+            }
+        }
+        
+        // EŞYA ALIM/SATIM İŞLEMLERİ (YENİ)
+        async function buyItem(itemId) {
+            const item = GAME_ITEMS[itemId];
+            if (!item || !currentUserData || currentUserData.gold < item.buyPrice) {
+                console.log("Yetersiz altın veya geçersiz eşya.");
+                return;
+            }
+            const userRef = doc(db, "users", auth.currentUser.uid);
+            const newItemObject = {
+                id: itemId,
+                name: item.name,
+                // Diğer eşya özelliklerini buraya ekleyebilirsiniz.
+            };
+            try {
+                await updateDoc(userRef, {
+                    gold: increment(-item.buyPrice),
+                    inventory: arrayUnion(newItemObject)
+                });
+                console.log(`${item.name} satın alındı.`);
+            } catch (error) {
+                console.error("Eşya alımında hata:", error);
+            }
+        }
+
+        async function sellItem(itemId) {
+            const item = GAME_ITEMS[itemId];
+            if (!item) return;
+
+            const userRef = doc(db, "users", auth.currentUser.uid);
+
+            try {
+                await runTransaction(db, async (transaction) => {
+                    const userDoc = await transaction.get(userRef);
+                    if (!userDoc.exists()) {
+                        throw "Kullanıcı bulunamadı!";
+                    }
+                    const userData = userDoc.data();
+                    const inventory = userData.inventory || [];
+                    
+                    const itemIndex = inventory.findIndex(invItem => invItem.id === itemId);
+
+                    if (itemIndex > -1) {
+                        inventory.splice(itemIndex, 1); // Eşyayı envanterden kaldır
+                        transaction.update(userRef, {
+                            inventory: inventory,
+                            gold: increment(item.sellPrice)
+                        });
+                    } else {
+                        throw "Satılacak eşya envanterde yok.";
+                    }
+                });
+                console.log(`${item.name} satıldı.`);
+            } catch (error) {
+                console.error("Eşya satımında hata: ", error);
+            }
+        }
+
+        async function equipItem(inventoryIndex) {
+            const userRef = doc(db, "users", auth.currentUser.uid);
+            
+            try {
+                await runTransaction(db, async (transaction) => {
+                    const userDoc = await transaction.get(userRef);
+                    if (!userDoc.exists()) throw "Kullanıcı bulunamadı!";
+                    
+                    let data = userDoc.data();
+                    let inventory = [...data.inventory];
+                    // Firestore'da equipment objesi yoksa, boş olarak oluştur
+                    let equipment = data.equipment || { weapon: null, helmet: null, chest: null, pants: null, boots: null, gloves: null, necklace: null, bracelet: null, earring: null, belt: null };
+
+                    const itemToEquip = inventory[inventoryIndex];
+                    if (!itemToEquip) throw "Eşya envanterde bulunamadı.";
+                    
+                    const itemData = GAME_ITEMS[itemToEquip.id];
+                    const slotType = itemData.subCategory || itemData.category; // Silahlar için category, diğerleri için subCategory
+                    const slotKey = SLOT_TYPE_TO_KEY_MAP[slotType];
+
+                    if (!slotKey) throw "Bu eşya giyilemez.";
+
+                    // Mevcut giyili eşyayı envantere geri koy
+                    const currentlyEquippedItem = equipment[slotKey];
+                    if (currentlyEquippedItem) {
+                        inventory.push(currentlyEquippedItem);
+                    }
+
+                    // Yeni eşyayı envanterden çıkar
+                    inventory.splice(inventoryIndex, 1);
+                    
+                    // Yeni eşyayı giy
+                    equipment[slotKey] = itemToEquip;
+
+                    transaction.update(userRef, { inventory, equipment });
+                });
+            } catch (error) {
+                console.error("Ekipman giyme hatası:", error);
+            }
+        }
+
+        async function unequipItem(slotKey) {
+            const userRef = doc(db, "users", auth.currentUser.uid);
+
+            try {
+                await runTransaction(db, async (transaction) => {
+                    const userDoc = await transaction.get(userRef);
+                    if (!userDoc.exists()) throw "Kullanıcı bulunamadı!";
+
+                    let data = userDoc.data();
+                    let inventory = [...data.inventory];
+                    let equipment = data.equipment;
+
+                    if (!equipment || !equipment[slotKey]) throw "Bu slotta zaten eşya yok.";
+                    
+                    const itemToUnequip = equipment[slotKey];
+                    
+                    // Eşyayı envantere ekle
+                    inventory.push(itemToUnequip);
+                    
+                    // Slottan eşyayı kaldır
+                    equipment[slotKey] = null;
+
+                    transaction.update(userRef, { inventory, equipment });
+                });
+            } catch (error) {
+                console.error("Ekipman çıkarma hatası:", error);
+            }
+        }
+
+
+        document.getElementById('market-item-list').addEventListener('click', (e) => {
+            const buyButton = e.target.closest('.buy-item-btn');
+            if (buyButton) {
+                buyItem(buyButton.dataset.itemId);
+                return;
+            }
+            const sellButton = e.target.closest('.sell-item-btn');
+            if (sellButton) {
+                sellItem(sellButton.dataset.itemId);
+            }
+        });
+
+
+        function renderChestUI() {
+            if (!currentUserData) return;
+
+            chestPageButtons.forEach(btn => {
+                btn.classList.toggle('active', parseInt(btn.dataset.page) === currentChestPage);
+            });
+            
+            // *** YENİLENEN BÖLÜM BAŞLANGICI ***
+            chestPlayerInventory.innerHTML = '';
+            const playerInventory = currentUserData.inventory || [];
+            for (let i = 0; i < 30; i++) {
+                const item = playerInventory[i];
+                const slot = document.createElement('div');
+                slot.className = 'inventory-slot rounded-lg flex items-center justify-center text-xs p-1 text-center';
+                
+                if (item && GAME_ITEMS[item.id]) {
+                    const itemData = GAME_ITEMS[item.id];
+                    slot.innerHTML = itemData.icon;
+                    // EKSİK OLAN TOOLTIP OLAYLARI BURAYA EKLENDİ
+                    slot.addEventListener('mouseenter', () => showItemTooltip(item.id, slot));
+                    slot.addEventListener('mouseleave', hideItemTooltip);
+                }
+                chestPlayerInventory.appendChild(slot);
+            }
+            // *** YENİLENEN BÖLÜM SONU ***
+
+            chestHouseInventory.innerHTML = '';
+            const houseInventory = (currentUserData.houseInventory && currentUserData.houseInventory.length === 60)
+                ? currentUserData.houseInventory
+                : Array(60).fill(null);
+
+            const pageStartIndex = (currentChestPage - 1) * 30;
+            for (let i = 0; i < 30; i++) {
+                const itemIndex = pageStartIndex + i;
+                const item = houseInventory[itemIndex];
+                const slot = document.createElement('div');
+                slot.className = 'inventory-slot rounded-lg flex items-center justify-center text-xs p-1 text-center';
+                if (item) {
+                    slot.textContent = item.name;
+                }
+                chestHouseInventory.appendChild(slot);
+            }
+        }
+
+        function initPriceChart() {
+            const ctx = document.getElementById('price-chart').getContext('2d');
+            if (priceChart) {
+                priceChart.destroy();
+            }
+            
+            const initialLabels = Array.from({length: 20}, (_, i) => `${19 - i}dk önce`);
+
+            priceChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: initialLabels,
+                    datasets: [{
+                        label: 'Elma Şarabı',
+                        data: Array.from({length: 20}, () => 110 + Math.random() * 20),
+                        borderColor: 'rgba(251, 191, 36, 0.8)',
+                        backgroundColor: 'rgba(251, 191, 36, 0.2)',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        pointRadius: 2,
+                        fill: true
+                    }, {
+                        label: 'Üzüm Şarabı',
+                        data: Array.from({length: 20}, () => 240 + Math.random() * 30),
+                        borderColor: 'rgba(192, 132, 252, 0.8)',
+                        backgroundColor: 'rgba(192, 132, 252, 0.2)',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        pointRadius: 2,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            labels: { color: 'white' }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Anlık Fiyat Değişimi',
+                            color: 'white',
+                            font: { size: 16 }
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) { label += ': '; }
+                                    if (context.parsed.y !== null) {
+                                        label += `${Math.round(context.parsed.y)} 💰`;
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Fiyat (💰)',
+                                color: 'rgba(255,255,255,0.8)'
+                            },
+                            ticks: {
+                                color: 'rgba(255,255,255,0.7)',
+                                callback: function(value) { return value + ' 💰'; }
+                            },
+                            grid: { color: 'rgba(255,255,255,0.2)' }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Zaman',
+                                color: 'rgba(255,255,255,0.8)'
+                            },
+                            ticks: {
+                                color: 'rgba(255,255,255,0.7)',
+                                autoSkip: true,
+                                maxTicksLimit: 8
+                            },
+                            grid: { color: 'rgba(255,255,255,0.1)' }
+                        }
+                    },
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    }
+                }
+            });
+
+            if (priceUpdateInterval) clearInterval(priceUpdateInterval);
+            priceUpdateInterval = setInterval(updatePrices, 60000); // Update every minute
+        }
+
+        function updatePrices() {
+            if (!priceChart) return;
+
+            const timeLabel = new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+            priceChart.data.labels.push(timeLabel);
+            priceChart.data.labels.shift();
+
+            priceChart.data.datasets.forEach((dataset, index) => {
+                const lastValue = dataset.data[dataset.data.length - 1];
+                const baseValue = index === 0 ? 120 : 250;
+                const volatility = index === 0 ? 10 : 20;
+                let newValue = lastValue + (Math.random() - 0.5) * volatility;
+                if (newValue < baseValue * 0.8) newValue = baseValue * 0.8;
+                if (newValue > baseValue * 1.2) newValue = baseValue * 1.2;
+                
+                dataset.data.push(newValue);
+                dataset.data.shift();
+                
+                const priceElementId = index === 0 ? 'apple-wine-price' : 'grape-wine-price';
+                const priceElement = document.getElementById(priceElementId);
+                if (priceElement) {
+                     priceElement.textContent = `${Math.round(newValue)} 💰`;
+                }
+            });
+            priceChart.update();
+        }
+
+        function showItemTooltip(itemId, element) {
+            clearTimeout(hideTooltipTimeout); // << ÖNCEKİ GİZLEME ZAMANLAYICISINI İPTAL ET
+            const itemData = GAME_ITEMS[itemId];
+            if (!itemData) return;
+
+            const rarity = RARITY_CONFIG[itemData.rarity] || RARITY_CONFIG.common;
+            
+            let statsHtml = '';
+            if (itemData.stats) {
+                statsHtml += '<div class="border-t border-gray-700 mt-2 pt-2 space-y-1">';
+                for (const [stat, value] of Object.entries(itemData.stats)) {
+                    statsHtml += `<p class="text-green-400 capitalize">${stat.replace(/([A-Z])/g, ' $1')}: +${value}</p>`;
+                }
+                statsHtml += '</div>';
+            }
+
+            itemTooltip.innerHTML = `
+                <h4 class="font-bold text-lg" style="color: ${rarity.color};">${itemData.name}</h4>
+                <p class="text-sm text-gray-400" style="color: ${rarity.color};">${rarity.name} ${itemData.category}</p>
+                ${statsHtml}
+                <div class="border-t border-gray-700 mt-2 pt-2">
+                    <p class="text-yellow-400">Satış Fiyatı: ${itemData.sellPrice} 💰</p>
+                </div>
+            `;
+            
+            const rect = element.getBoundingClientRect();
+            itemTooltip.style.left = `${rect.right + 10}px`;
+            itemTooltip.style.top = `${rect.top}px`;
+            
+            itemTooltip.classList.remove('hidden');
+            setTimeout(() => itemTooltip.classList.add('visible'), 10);
+        }
+
+        function hideItemTooltip() {
+            // Zamanlayıcıyı değişkene ata
+            hideTooltipTimeout = setTimeout(() => {
+                itemTooltip.classList.remove('visible');
+                // Animasyonun bitmesi için ek bir gecikme sonrası gizle
+                setTimeout(() => itemTooltip.classList.add('hidden'), 200);
+            }, 200); // 200ms bekle sonra gizle
+        }
+
+        function handleUserLogin(user) {
+             if (!user) return;
+             if (unsubscribeUser) unsubscribeUser();
+             unsubscribeUser = onSnapshot(doc(db, "users", user.uid), (docSnap) => {
+                if (docSnap.exists()) {
+                    currentUserData = docSnap.data();
+                    if (currentUserData.characterCreated && !isResettingCharacter) {
+                        userDisplay.textContent = currentUserData.inGameName || currentUserData.username;
+                        uidDisplay.textContent = user.uid;
+                        updateCharacterSheetUI();
+                        // Market ekranı açıksa yenile
+                        if (!marketTradeScreen.classList.contains('hidden')) {
+                           renderMarketItems();
+                        }
+                        showScreen(mainMenuScreen);
+                    } else {
+                        setupCharacterCreation();
+                        showScreen(characterCreationScreen);
+                    }
+                }
+             });
+        }
+        
+        onAuthStateChanged(auth, (user) => {
+            if (user) { handleUserLogin(user); } 
+            else {
+                showScreen(authScreen);
+                if (unsubscribeUser) unsubscribeUser();
+                currentUserData = null;
+            }
+        });
+
+        const createUserDocument = async (user) => {
+            if (!user) return;
+            const userRef = doc(db, "users", user.uid);
+            const userSnap = await getDoc(userRef);
+            if (!userSnap.exists()) {
+                const username = user.displayName || user.email.split('@')[0];
+                await setDoc(userRef, {
+                    username, email: user.email, uid: user.uid, createdAt: new Date(),
+                    characterCreated: false,
+                    gold: 1000, 
+                    diamonds: 200,
+                    fame: 1000,
+                    energy: 100,
+                    maxEnergy: 100,
+                    inventory: [],
+                    houseInventory: Array(60).fill(null), // Initialize house inventory
+                    usedCodes: [],
+                    equipment: {
+                        weapon: null, helmet: null, chest: null, pants: null, 
+                        boots: null, gloves: null, necklace: null, bracelet: null, 
+                        earring: null, belt: null
+                    }
+                });
+            }
+        };
+        
+        window.addEventListener('mousemove', (e) => {
+            let activeScreen = !characterCreationScreen.classList.contains('hidden') ? 'character-creation-screen' : !characterSheetModal.classList.contains('hidden') ? 'character-sheet-modal' : null;
+            if (!activeScreen) return;
+            const svgId = activeScreen === 'character-creation-screen' ? 'character-preview' : 'sheet-character-preview';
+            const head = document.querySelector(`#${svgId} #head-group`)?.getBoundingClientRect();
+            if(!head) return;
+            const pupilsToMove = document.querySelectorAll(`#${svgId} #pupil-left, #${svgId} #pupil-right`);
+            pupilsToMove.forEach((pupil, i) => {
+                const eyeX = head.left + (eyeOrigins[i].x - 60) * (head.width / 80), eyeY = head.top + (eyeOrigins[i].y - 25) * (head.height / 90);
+                const angle = Math.atan2(e.clientY - eyeY, e.clientX - eyeX);
+                pupil.setAttribute('cx', eyeOrigins[i].x + Math.cos(angle) * maxMove);
+                pupil.setAttribute('cy', eyeOrigins[i].y + Math.sin(angle) * maxMove);
+            });
+        });
+        
+        function hideStatTooltip() {
+            statTooltip.classList.add('opacity-0', 'hidden');
+            window.removeEventListener('click', hideStatTooltip, true);
+        }
+
+        document.getElementById('stats-container').addEventListener('click', (e) => {
+            const infoBtn = e.target.closest('.stat-info-btn');
+            if (infoBtn) {
+                e.stopPropagation();
+                hideStatTooltip();
+                const stat = infoBtn.dataset.stat;
+                statTooltip.innerHTML = STAT_DESCRIPTIONS[stat];
+                const rect = infoBtn.getBoundingClientRect();
+                statTooltip.style.left = `${rect.right + 10}px`;
+                statTooltip.style.top = `${rect.top}px`;
+                statTooltip.classList.remove('hidden');
+                setTimeout(() => statTooltip.classList.remove('opacity-0'), 10);
+                setTimeout(() => window.addEventListener('click', hideStatTooltip, true), 0);
+                return;
+            }
+            const plusBtn = e.target.closest('.stat-plus-btn');
+            if (plusBtn) {
+                 const stat = plusBtn.dataset.stat;
+                const amount = parseInt(plusBtn.dataset.amount) || 1;
+                incrementStat(stat, amount);
+                if (amount === 1) {
+                    const now = Date.now();
+                    const tracker = statClickTracker[stat] || { count: 0, lastClick: 0 };
+                    if (now - tracker.lastClick < 400) { tracker.count++; } 
+                    else { tracker.count = 1; }
+                    tracker.lastClick = now;
+                    statClickTracker[stat] = tracker;
+                    if (tracker.count >= 3) {
+                        const plus10Button = plusBtn.nextElementSibling;
+                        if (plus10Button && currentUserData.statPoints >= 10) {
+                            plus10Button.classList.remove('hidden');
+                            setTimeout(() => plus10Button.classList.add('hidden'), 3000);
+                        }
+                        tracker.count = 0;
+                    }
+                }
+            }
+        });
+        
+        async function incrementStat(stat, amount) {
+            const user = auth.currentUser;
+            if (!user || !currentUserData || currentUserData.statPoints < amount) return;
+            const userRef = doc(db, "users", user.uid);
+            try {
+                const statKey = `stats.${stat}`;
+                await updateDoc(userRef, {
+                    [statKey]: increment(amount),
+                    statPoints: increment(-amount)
+                });
+            } catch (error) {
+                console.error("Stat güncellenirken hata:", error);
+            }
+        }
+
+        startGameBtn.addEventListener('click', () => showScreen(gameScreen));
+        playerProfileButton.addEventListener('click', () => {
+            updateCharacterSheetUI();
+            characterSheetModal.classList.remove('hidden');
+            setTimeout(() => characterSheetModal.classList.remove('modal-closed'), 10); 
+        });
+        closeCharacterSheetButton.addEventListener('click', () => {
+            characterSheetModal.classList.add('modal-closed');
+            setTimeout(() => characterSheetModal.classList.add('hidden'), 300); 
+        });
+        globalSettingsBtn.addEventListener('click', () => settingsModal.classList.remove('hidden'));
+        closeSettingsModalBtn.addEventListener('click', () => settingsModal.classList.add('hidden'));
+        logoutBtn.addEventListener('click', () => {
+            signOut(auth);
+            settingsModal.classList.add('hidden');
+        });
+        resetCharacterBtn.addEventListener('click', () => {
+            isResettingCharacter = true;
+            settingsModal.classList.add('hidden');
+            handleUserLogin(auth.currentUser);
+        });
+        loginTabBtn.addEventListener('click', () => {
+            loginTabBtn.classList.add('active');
+            registerTabBtn.classList.remove('active');
+            loginForm.classList.remove('hidden');
+            registerForm.classList.add('hidden');
+            authMessage.textContent = "";
+        });
+        registerTabBtn.addEventListener('click', () => {
+            registerTabBtn.classList.add('active');
+            loginTabBtn.classList.remove('active');
+            registerForm.classList.remove('hidden');
+            loginForm.classList.add('hidden');
+            authMessage.textContent = "";
+        });
+        registerForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const username = document.getElementById('register-username').value;
+            const password = document.getElementById('register-password').value;
+            const email = `${username}@oyun.local`;
+            createUserWithEmailAndPassword(auth, email, password)
+                .then((userCredential) => {
+                    authMessage.textContent = "Kayıt başarılı! Yönlendiriliyor...";
+                    authMessage.style.color = 'lightgreen';
+                    createUserDocument(userCredential.user);
+                })
+                .catch((error) => {
+                    if (error.code === 'auth/email-already-in-use') authMessage.textContent = "Bu kullanıcı adı zaten kullanılıyor.";
+                    else if (error.code === 'auth/weak-password') authMessage.textContent = "Şifre en az 6 karakter olmalı.";
+                    else authMessage.textContent = "Kayıt sırasında bir hata oluştu.";
+                });
+        });
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+            const email = `${username}@oyun.local`;
+            signInWithEmailAndPassword(auth, email, password)
+                .catch(() => { authMessage.textContent = "Kullanıcı adı veya şifre hatalı."; });
+        });
+        googleSignInBtn.addEventListener('click', () => {
+            const provider = new GoogleAuthProvider();
+            signInWithPopup(auth, provider)
+                .then(async (result) => await createUserDocument(result.user))
+                .catch((error) => { 
+                    console.error("Google giriş hatası:", error);
+                    authMessage.textContent = "Google ile giriş yapılamadı."; 
+                });
+        });
+        homeButton.addEventListener('click', () => showGameSubScreen(homeScreen));
+        arenaButton.addEventListener('click', () => showGameSubScreen(arenaScreen));
+        marketButton.addEventListener('click', () => showGameSubScreen(marketScreen));
+        goToGarageBtn.addEventListener('click', () => showGameSubScreen(garageScreen));
+        goToGardenBtn.addEventListener('click', () => showGameSubScreen(gardenScreen));
+        goToBasementBtn.addEventListener('click', () => showGameSubScreen(basementScreen));
+        document.querySelectorAll('.back-to-village-button').forEach(button => {
+            button.addEventListener('click', () => {
+                showVillageView();
+                if(priceUpdateInterval) clearInterval(priceUpdateInterval);
+            });
+        });
+        document.querySelectorAll('.back-to-home-button').forEach(button => {
+            button.addEventListener('click', () => showGameSubScreen(homeScreen));
+        });
+        showLeaguesButton.addEventListener('click', () => { arenaMainView.classList.add('hidden'); leaguesScreen.classList.remove('hidden'); });
+        showDungeonsButton.addEventListener('click', () => { arenaMainView.classList.add('hidden'); dungeonsScreen.classList.remove('hidden'); });
+        document.querySelectorAll('.back-to-arena-button').forEach(b => b.addEventListener('click', () => {
+            leaguesScreen.classList.add('hidden');
+            dungeonsScreen.classList.add('hidden');
+            arenaMainView.classList.remove('hidden');
+        }));
+        showMarketBuyButton.addEventListener('click', () => { marketMainView.classList.add('hidden'); marketBuyScreen.classList.remove('hidden'); });
+        showMarketSellButton.addEventListener('click', () => { 
+            marketMainView.classList.add('hidden'); 
+            marketSellScreen.classList.remove('hidden'); 
+            initPriceChart();
+        });
+        showMarketTradeButton.addEventListener('click', () => { 
+            marketMainView.classList.add('hidden'); 
+            marketTradeScreen.classList.remove('hidden');
+            currentMarketCategory = 'Silah'; // Varsayılan kategoriyi ayarla
+            renderMarketTradeScreen();
+        });
+        document.querySelectorAll('.back-to-market-button').forEach(b => b.addEventListener('click', () => {
+            marketBuyScreen.classList.add('hidden');
+            marketSellScreen.classList.add('hidden');
+            marketTradeScreen.classList.add('hidden');
+            marketQuickSellScreen.classList.add('hidden'); // << EKLENEN YENİ SATIR
+            marketMainView.classList.remove('hidden');
+            if(priceUpdateInterval) clearInterval(priceUpdateInterval);
+        }));
+
+        // Basement Menu Logic
+        openBasementMenuBtn.addEventListener('click', () => showGameSubScreen(basementMenuScreen));
+        closeBasementMenuBtn.addEventListener('click', () => showGameSubScreen(basementScreen));
+        showDevelopmentsBtn.addEventListener('click', () => showGameSubScreen(developmentsScreen));
+        showEmployeesBtn.addEventListener('click', () => showGameSubScreen(employeesScreen));
+        backToBasementMenuBtns.forEach(btn => btn.addEventListener('click', () => showGameSubScreen(basementMenuScreen)));
+
+
+        redeemCodeButton.addEventListener('click', async () => {
+            const codeInput = document.getElementById('gift-code-input');
+            const code = codeInput.value.trim();
+            const user = auth.currentUser;
+            if (!code || !user) return;
+            giftCodeMessage.textContent = "";
+            if (code === "MusTea200") {
+                if (currentUserData.usedCodes && currentUserData.usedCodes.includes("MusTea200")) {
+                    giftCodeMessage.textContent = "Bu kod zaten kullanılmış.";
+                    giftCodeMessage.style.color = "orange";
+                    return;
+                }
+                const userRef = doc(db, "users", user.uid);
+                const stick = { id: `stick_${Date.now()}`, name: "Sopa", type: "weapon", rarity: "common", stats: { hp: 20, guc: 5 } };
+                try {
+                    await updateDoc(userRef, {
+                        gold: increment(1000),
+                        diamonds: increment(200),
+                        inventory: arrayUnion(stick),
+                        usedCodes: arrayUnion("MusTea200")
+                    });
+                    giftCodeMessage.textContent = "Ödüller eklendi!";
+                    giftCodeMessage.style.color = "lightgreen";
+                    codeInput.value = "";
+                } catch(e) {
+                     giftCodeMessage.textContent = "Bir hata oluştu.";
+                     giftCodeMessage.style.color = "red";
+                }
+            } else {
+                giftCodeMessage.textContent = "Geçersiz kod.";
+                giftCodeMessage.style.color = "red";
+            }
+        });
+
+        function setupCharacterCreation() {
+            const skinContainer = document.getElementById('skin-color-swatches');
+            const hairContainer = document.getElementById('hair-color-swatches');
+            skinContainer.innerHTML = '';
+            hairContainer.innerHTML = '';
+            skinColors.forEach((color, index) => {
+                const swatch = document.createElement('div');
+                swatch.className = 'color-swatch';
+                if (index === 1) swatch.classList.add('selected');
+                swatch.style.backgroundColor = color;
+                swatch.addEventListener('click', () => {
+                    selectedSkinColor = color;
+                    document.querySelectorAll('#character-creation-screen .character-skin-part').forEach(part => part.style.fill = color);
+                    skinContainer.querySelector('.selected')?.classList.remove('selected');
+                    swatch.classList.add('selected');
+                });
+                skinContainer.appendChild(swatch);
+            });
+            hairColors.forEach((color, index) => {
+                const swatch = document.createElement('div');
+                swatch.className = 'color-swatch';
+                if (index === 1) swatch.classList.add('selected');
+                swatch.style.backgroundColor = color;
+                swatch.addEventListener('click', () => {
+                    selectedHairColor = color;
+                    ['#hair-male', '#hair-female-front', '#hair-female-back'].forEach(id => {
+                        const el = document.querySelector(`#character-creation-screen ${id}`);
+                        if (el) el.style.fill = color;
+                    });
+                    hairContainer.querySelector('.selected')?.classList.remove('selected');
+                    swatch.classList.add('selected');
+                });
+                hairContainer.appendChild(swatch);
+            });
+            document.querySelectorAll('.gender-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    selectedGender = e.target.dataset.gender;
+                    document.querySelector('.gender-btn.active').classList.remove('active');
+                    e.target.classList.add('active');
+                    const isMale = selectedGender === 'male';
+                    ['#body-male', '#hair-male-front-group'].forEach(id => document.querySelector(`#character-creation-screen ${id}`).classList.toggle('hidden', !isMale));
+                    ['#body-female', '#hair-female-front-group', '#hair-female-back-group'].forEach(id => document.querySelector(`#character-creation-screen ${id}`).classList.toggle('hidden', isMale));
+                });
+            });
+            if (currentUserData && currentUserData.inGameName) {
+                document.getElementById('in-game-name-container').classList.add('hidden');
+                document.getElementById('in-game-name-display').classList.remove('hidden');
+                document.getElementById('locked-in-game-name').textContent = currentUserData.inGameName;
+            } else {
+                document.getElementById('in-game-name-container').classList.remove('hidden');
+                document.getElementById('in-game-name-display').classList.add('hidden');
+            }
+            ['#body-male', '#hair-male-front-group'].forEach(id => document.querySelector(`#character-creation-screen ${id}`).classList.remove('hidden'));
+            ['#body-female', '#hair-female-front-group', '#hair-female-back-group'].forEach(id => document.querySelector(`#character-creation-screen ${id}`).classList.add('hidden'));
+            if(isResettingCharacter) {
+                resetCharWarning.textContent = "Karakterini yeniden tasarla! (100💎)";
+                createCharacterBtn.disabled = currentUserData && currentUserData.diamonds < 100;
+                if (createCharacterBtn.disabled) resetCharWarning.textContent = "Yeterli elmas yok! (100💎 gerekli)";
+            } else {
+                createCharacterBtn.disabled = false;
+                resetCharWarning.textContent = "";
+            }
+        }
+        
+        characterCreationForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            createCharacterBtn.disabled = true; 
+            nameValidationMessage.textContent = ''; 
+            const user = auth.currentUser;
+            if (!user) { createCharacterBtn.disabled = false; return; }
+            const inGameName = document.getElementById('character-name-input').value.trim();
+            const nameRegex = /^[a-zA-Z0-9öçşığüÖÇŞİĞÜ]+$/;
+            if (!currentUserData.inGameName && (inGameName.length < 3 || !nameRegex.test(inGameName))) {
+                nameValidationMessage.textContent = inGameName.length < 3 ? "İsim en az 3 karakter olmalı." : "İsim özel karakter içeremez.";
+                createCharacterBtn.disabled = false;
+                return;
+            }
+            try {
+                await runTransaction(db, async (transaction) => {
+                    const userRef = doc(db, "users", user.uid);
+                    let updateData = {
+                        character: { gender: selectedGender, skinColor: selectedSkinColor, hairColor: selectedHairColor },
+                        characterCreated: true,
+                        level: 1, exp: 0, maxExp: 100, statPoints: 5,
+                        stats: { guc: 1, zeka: 1, hiz: 1, tanklik: 1 },
+                        fame: 1000, energy: 100, maxEnergy: 100, inventory: [], houseInventory: Array(60).fill(null), usedCodes: []
+                    };
+                    if (!currentUserData.inGameName) {
+                        const lowercaseName = inGameName.toLowerCase();
+                        const usernameRef = doc(db, "usernames", lowercaseName);
+                        const usernameDoc = await transaction.get(usernameRef);
+                        if (usernameDoc.exists()) throw new Error("Bu oyun içi isim zaten alınmış.");
+                        transaction.set(usernameRef, { uid: user.uid });
+                        updateData.inGameName = inGameName;
+                    }
+                    if(isResettingCharacter) {
+                        const freshUserData = await transaction.get(userRef);
+                        if (freshUserData.data().diamonds < 100) throw new Error("Yeterli elmasın yok!");
+                        updateData.diamonds = freshUserData.data().diamonds - 100;
+                    }
+                    transaction.update(userRef, updateData);
+                });
+                isResettingCharacter = false;
+                resetCharWarning.textContent = "";
+            } catch (error) {
+                nameValidationMessage.textContent = error.message;
+                createCharacterBtn.disabled = false; 
+            }
+        });
+
+        // Event Listeners for Chest
+        openChestButton.addEventListener('click', () => {
+            currentChestPage = 1;
+            renderChestUI();
+            chestModal.classList.remove('hidden');
+        });
+        closeChestButton.addEventListener('click', () => {
+            chestModal.classList.add('hidden');
+        });
+        chestPageButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                currentChestPage = parseInt(button.dataset.page);
+                renderChestUI();
+            });
+        });
+
+        // KARAKTER SAYFASI İÇİN OLAY DİNLEYİCİLERİ
+        const characterSheetWindow = document.querySelector('.character-sheet-window');
+        let draggedItemInfo = null;
+
+        // Sürükleme Başlangıcı
+        characterSheetWindow.addEventListener('dragstart', (e) => {
+            const target = e.target.closest('[draggable="true"]');
+            if (!target) return;
+            
+            draggedItemInfo = {
+                type: target.dataset.itemType,
+                itemId: target.dataset.itemId,
+                inventoryIndex: target.dataset.inventoryIndex,
+                slotKey: target.dataset.slotKey
+            };
+            e.dataTransfer.setData('text/plain', JSON.stringify(draggedItemInfo));
+            setTimeout(() => target.classList.add('opacity-50'), 0); // Görsel geri bildirim
+        });
+
+        // Sürükleme Bitişi
+        characterSheetWindow.addEventListener('dragend', (e) => {
+            const target = e.target.closest('[draggable="true"]');
+            if (target) {
+                target.classList.remove('opacity-50');
+            }
+            draggedItemInfo = null;
+        });
+
+        // Sürüklenerek Üzerine Gelme
+        characterSheetWindow.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            const dropTarget = e.target.closest('.equipment-slot, #character-inventory-grid');
+            if(dropTarget) {
+                 document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+                 if(dropTarget.classList.contains('equipment-slot')) {
+                     dropTarget.classList.add('drag-over');
+                 }
+            }
+        });
+
+        characterSheetWindow.addEventListener('dragleave', (e) => {
+             const dropTarget = e.target.closest('.equipment-slot');
+             if(dropTarget) dropTarget.classList.remove('drag-over');
+        });
+
+        // Bırakma
+        characterSheetWindow.addEventListener('drop', (e) => {
+            e.preventDefault();
+            document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+            const dropTarget = e.target.closest('.equipment-slot, #character-inventory-grid');
+            if (!dropTarget || !draggedItemInfo) return;
+
+            // Ekipman slotuna bırakma (Giyme)
+            if (dropTarget.classList.contains('equipment-slot')) {
+                if (draggedItemInfo.type !== 'inventory') return; // Sadece envanterden giyilebilir
+                
+                const itemData = GAME_ITEMS[draggedItemInfo.itemId];
+                const itemSlotType = itemData.subCategory || itemData.category;
+                const targetSlotType = dropTarget.dataset.slotType;
+
+                if (itemSlotType === targetSlotType) {
+                    equipItem(parseInt(draggedItemInfo.inventoryIndex));
+                }
+            }
+            // Envantere bırakma (Çıkarma)
+            else if (dropTarget.id === 'character-inventory-grid') {
+                if (draggedItemInfo.type !== 'equipment') return; // Sadece ekipmandan çıkarılabilir
+                unequipItem(draggedItemInfo.slotKey);
+            }
+        });
+
+        // Çift Tıklama
+        characterSheetWindow.addEventListener('dblclick', (e) => {
+            const target = e.target.closest('[data-item-id]');
+            if (!target) return;
+            
+            const itemType = target.dataset.itemType;
+            if (itemType === 'inventory') {
+                equipItem(parseInt(target.dataset.inventoryIndex));
+            } else if (itemType === 'equipment') {
+                unequipItem(target.dataset.slotKey);
+            }
+        });
+
+        function renderQuickSellScreen() {
+            if (!currentUserData) return;
+            quickSellInventoryGrid.innerHTML = '';
+            quickSellSelectedIndices = []; // Ekran her yenilendiğinde seçimi sıfırla
+            updateQuickSellTotal();
+
+            currentUserData.inventory.forEach((item, index) => {
+                if (item && GAME_ITEMS[item.id]) {
+                    const itemData = GAME_ITEMS[item.id];
+                    const slot = document.createElement('div');
+                    slot.className = 'inventory-slot rounded-lg flex items-center justify-center cursor-pointer';
+                    slot.innerHTML = itemData.icon;
+                    slot.dataset.inventoryIndex = index; // Orijinal envanterdeki index'ini sakla
+                    
+                    slot.addEventListener('mouseenter', () => showItemTooltip(item.id, slot));
+                    slot.addEventListener('mouseleave', hideItemTooltip);
+                    
+                    quickSellInventoryGrid.appendChild(slot);
+                }
+            });
+        }
+
+        function updateQuickSellTotal() {
+            let totalValue = 0;
+            quickSellSelectedIndices.forEach(index => {
+                const item = currentUserData.inventory[index];
+                if (item && GAME_ITEMS[item.id]) {
+                    totalValue += GAME_ITEMS[item.id].sellPrice;
+                }
+            });
+            quickSellTotal.textContent = `${totalValue} 💰`;
+            quickSellConfirmButton.disabled = totalValue === 0;
+            document.getElementById('confirm-sell-price').textContent = `${totalValue} 💰`;
+        }
+
+        quickSellInventoryGrid.addEventListener('click', (e) => {
+            const slot = e.target.closest('.inventory-slot');
+            if (!slot) return;
+
+            const index = parseInt(slot.dataset.inventoryIndex);
+            const selectionIndex = quickSellSelectedIndices.indexOf(index);
+
+            if (selectionIndex > -1) {
+                // Zaten seçili, seçimi kaldır
+                quickSellSelectedIndices.splice(selectionIndex, 1);
+                slot.classList.remove('selected');
+            } else {
+                // Seçili değil, seç
+                quickSellSelectedIndices.push(index);
+                slot.classList.add('selected');
+            }
+            updateQuickSellTotal();
+        });
+
+        quickSellConfirmButton.addEventListener('click', () => {
+            if (quickSellSelectedIndices.length > 0) {
+                quickSellConfirmationModal.classList.remove('hidden');
+            }
+        });
+
+        confirmSellNoBtn.addEventListener('click', () => {
+            quickSellConfirmationModal.classList.add('hidden');
+        });
+
+        confirmSellYesBtn.addEventListener('click', async () => {
+            if (quickSellSelectedIndices.length === 0) return;
+
+            const userRef = doc(db, "users", auth.currentUser.uid);
+            try {
+                await runTransaction(db, async (transaction) => {
+                    const userDoc = await transaction.get(userRef);
+                    if (!userDoc.exists()) throw "Kullanıcı bulunamadı!";
+                    
+                    const currentGold = userDoc.data().gold;
+                    const currentInventory = userDoc.data().inventory;
+                    
+                    let goldToAdd = 0;
+                    const newInventory = currentInventory.filter((item, index) => {
+                        if (quickSellSelectedIndices.includes(index)) {
+                            goldToAdd += GAME_ITEMS[item.id].sellPrice;
+                            return false; // Bu eşyayı yeni envanterden çıkar
+                        }
+                        return true; // Bu eşyayı koru
+                    });
+                    
+                    transaction.update(userRef, {
+                        inventory: newInventory,
+                        gold: currentGold + goldToAdd
+                    });
+                });
+                console.log("Satış başarılı!");
+                quickSellConfirmationModal.classList.add('hidden');
+                // onSnapshot sayesinde UI otomatik güncellenecek, sadece yerel seçimleri sıfırlamamız yeterli
+                renderQuickSellScreen(); 
+            } catch (error) {
+                console.error("Satış sırasında hata:", error);
+                quickSellConfirmationModal.classList.add('hidden');
+            }
+        });
+
+    </script>
+</body>
+</html>
